@@ -25,4 +25,4 @@ Openbaar overzicht: https://kasperrich.github.io/auction-tracker/
 | `data/changes.jsonl` | Alle gevonden wijzigingen |
 | `dashboard/` | Pagina van het dashboard op claude.ai |
 
-Planning: elke 3 uur tot 3 november 17:00, daarna elke 15 minuten tot de veiling op 10 november sluit.
+Planning: dagelijks om 05:00, 12:00 en 19:00, en op 10 november van 15:00 tot de sluiting elk kwartier.
