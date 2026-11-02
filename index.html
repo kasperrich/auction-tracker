@@ -1,0 +1,453 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta http-equiv="refresh" content="600">
+<title>Veiling Easyfiets Leiden</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=Instrument+Sans:wght@400;500;600&display=swap">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<style>
+/* Layout: one column of cards under a sticky filter bar; charts share rows when wide. */
+:root {
+  --bg: #f4f5f2; --panel: #ffffff; --fg: #1c211d; --muted: #5f6a62; --line: #dfe3dc; --accent: #2f6b4f;
+  --ok: #1d7a45; --grid: #e9ece6; --axis: #b9c0b5; --pop: #ffffff;
+  --display: "Fraunces", Georgia, "Times New Roman", serif;
+  --body: "Instrument Sans", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --r: 10px;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #121513; --panel: #1a1e1b; --fg: #e7ebe6; --muted: #9aa59d; --line: #2c322e; --accent: #7cc49f;
+  --ok: #6fd093; --grid: #242a26; --axis: #4a534c; --pop: #222824; color-scheme: dark; } }
+:root[data-theme="dark"] {
+  --bg: #121513; --panel: #1a1e1b; --fg: #e7ebe6; --muted: #9aa59d; --line: #2c322e; --accent: #7cc49f;
+  --ok: #6fd093; --grid: #242a26; --axis: #4a534c; --pop: #222824; color-scheme: dark; }
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body { background: var(--bg); color: var(--fg); font: 15px/1.5 var(--body); }
+.wrap { max-width: 1240px; margin: 0 auto; padding-block: 28px 56px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: flex; flex-direction: column; gap: 20px; }
+a { color: inherit; }
+.hero { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 16px; padding-bottom: 16px; border-bottom: 1px solid var(--line); }
+.hero > div:first-child { flex: 1 1 26rem; min-width: 0; }
+.eyebrow { margin: 0 0 6px; font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+h1 { font-family: var(--display); font-weight: 400; font-size: clamp(30px, 5vw, 46px); line-height: 1.05; margin: 0; text-wrap: balance; }
+.lede { margin: 10px 0 0; color: var(--muted); max-width: 62ch; }
+.lede b { color: var(--fg); font-weight: 600; }
+.clock { display: flex; flex-direction: column; align-items: flex-end; text-align: right; gap: 2px; }
+.clock .big { font-family: var(--display); font-size: 28px; font-variant-numeric: tabular-nums; }
+.label { font-size: 12px; color: var(--muted); }
+.pill { display: inline-flex; gap: 6px; align-items: center; font-size: 12px; color: var(--muted); }
+.pill::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--ok); }
+
+.filters { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--bg); padding: 10px 0; border-bottom: 1px solid var(--line); display: flex; flex-direction: column; gap: 8px; }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--bg); }
+.chips, .row { display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: center; }
+.chips { gap: 6px; }
+.chip { font: inherit; font-size: 13px; display: inline-flex; align-items: center; gap: 6px; padding: 4px 11px; border-radius: 999px; border: 1px solid var(--line); background: var(--panel); color: var(--fg); cursor: pointer; }
+.chip i, .dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; flex: none; }
+.chip small { color: var(--muted); font-size: inherit; font-variant-numeric: tabular-nums; }
+.chip[aria-pressed="true"] { border-color: var(--fg); box-shadow: inset 0 0 0 1px var(--fg); }
+.row label { display: inline-flex; gap: 6px; align-items: center; font-size: 13px; color: var(--muted); }
+select, input[type=search], .btn { font: inherit; font-size: 13px; padding: 5px 9px; border: 1px solid var(--line); border-radius: 8px; background: var(--panel); color: var(--fg); }
+.btn { cursor: pointer; }
+input[type=search] { flex: 1; min-width: 12rem; font-size: 14px; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 11rem), 1fr)); gap: 12px; }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: var(--r); padding: 18px; min-width: 0; }
+.tile { display: flex; flex-direction: column; gap: 4px; }
+.num { font-family: var(--display); font-size: 28px; font-variant-numeric: tabular-nums; line-height: 1.15; }
+.sub { font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.sub.up { color: var(--ok); }
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 26rem), 1fr)); gap: 12px; }
+.wide { grid-column: 1 / -1; }
+.head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-start; gap: 8px 16px; }
+h2 { font-size: 16px; font-weight: 600; margin: 0; }
+.note { font-size: 12px; color: var(--muted); margin: 3px 0 12px; }
+.chart { position: relative; min-height: 240px; }
+.chart.tall { min-height: 300px; }
+.chart svg { display: block; overflow: visible; }
+.hit { cursor: pointer; }
+.empty { color: var(--muted); font-size: 13px; padding: 24px 0; margin: 0; }
+.tip { position: absolute; z-index: 3; pointer-events: none; background: var(--pop); border: 1px solid var(--line); border-radius: 8px; box-shadow: 0 6px 20px rgb(0 0 0 / .12); padding: 6px 10px; font-size: 12px; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.tip .h { color: var(--muted); margin-bottom: 2px; }
+.tip .r { display: flex; gap: 6px; align-items: center; }
+
+.scroll { max-height: 34rem; overflow: auto; }
+table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; font-size: 14px; }
+th, td { padding: 7px 9px; border-bottom: 1px solid var(--line); text-align: left; white-space: nowrap; }
+th { position: sticky; top: 0; background: var(--panel); color: var(--muted); font-size: 12px; font-weight: 600; z-index: 1; }
+.lots th { cursor: pointer; user-select: none; }
+.lots th[aria-sort=ascending]::after { content: " ↑"; }
+.lots th[aria-sort=descending]::after { content: " ↓"; }
+.r { text-align: right; }
+td.t { white-space: normal; min-width: 14rem; }
+.lots tbody tr { cursor: pointer; }
+.lots tbody tr:hover, .lots tbody tr.picked { background: var(--bg); }
+.cat { display: inline-flex; gap: 6px; align-items: center; }
+.bar { display: inline-block; height: 6px; border-radius: 3px; vertical-align: middle; margin-right: 6px; }
+.up { color: var(--ok); font-weight: 600; }
+.closed { color: var(--muted); }
+.foot { font-size: 12px; color: var(--muted); }
+@media (max-width: 40rem) { .narrow-hide { display: none; } .clock { align-items: flex-start; text-align: left; } }
+@media (prefers-reduced-motion: no-preference) {
+  .grow { animation: grow .5s cubic-bezier(.2,.7,.2,1) both; transform-origin: left center; transform-box: fill-box; }
+  @keyframes grow { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="hero">
+    <div>
+      <p class="eyebrow">Faillissementsveiling · Leiden · Auctivo</p>
+      <h1>Veiling Easyfiets Leiden</h1>
+      <p class="lede">Laatste meting <b id="moment">–</b>. Sinds de meting daarvoor zijn <b id="changed">–</b> kavels gewijzigd. <a id="auction" target="_blank" rel="noopener">Naar de veiling</a></p>
+    </div>
+    <div class="clock">
+      <span class="label">Eerste kavel sluit over</span>
+      <span class="big" id="countdown">–</span>
+      <span class="pill">Dinsdag 10 november, 19:00 tot ca. 20:35</span>
+    </div>
+  </header>
+
+  <section class="filters" aria-label="Filters">
+    <div class="chips" id="chips" role="group" aria-label="Categorieën"></div>
+    <div class="row">
+      <label>Status <select id="f-status"><option value="alle">Alle kavels</option><option value="open">Nog open</option><option value="gesloten">Gesloten</option></select></label>
+      <label><input type="checkbox" id="f-bod"> Alleen kavels met een bod</label>
+      <button type="button" class="btn" id="f-reset">Filters wissen</button>
+      <span class="label" id="f-text"></span>
+    </div>
+  </section>
+
+  <section class="tiles">
+    <div class="card tile"><span class="label">Som van de hoogste biedingen</span><span class="num" id="t-som">–</span><span class="sub" id="s-som"></span></div>
+    <div class="card tile"><span class="label">Biedingen</span><span class="num" id="t-bied">–</span><span class="sub" id="s-bied"></span></div>
+    <div class="card tile"><span class="label">Kavels met een bod</span><span class="num" id="t-met">–</span><span class="sub" id="s-met"></span></div>
+    <div class="card tile"><span class="label">Gemiddeld bod per kavel met bod</span><span class="num" id="t-gem">–</span><span class="sub" id="s-gem"></span></div>
+    <div class="card tile"><span class="label">Hoogste bod</span><span class="num" id="t-top">–</span><span class="sub" id="s-top"></span></div>
+  </section>
+
+  <section class="grid">
+    <div class="card wide">
+      <div class="head">
+        <div><h2>Verloop per meting</h2><p class="note">Eén punt per meting: elke 3 uur tot 3 november 17:00, daarna elke 15 minuten.</p></div>
+        <div class="row">
+          <label>Toon <select id="c-trend"><option value="bod">Som van de hoogste biedingen</option><option value="biedingen">Aantal biedingen</option><option value="metbod">Kavels met een bod</option></select></label>
+          <label>Lijnen <select id="c-split"><option value="totaal">Eén lijn (totaal)</option><option value="categorie">Per categorie</option></select></label>
+        </div>
+      </div>
+      <div class="chart tall" id="ch-trend"></div>
+    </div>
+    <div class="card">
+      <div class="head">
+        <div><h2>Per categorie</h2><p class="note">Klik op een balk om op die categorie te filteren.</p></div>
+        <select id="c-cat" aria-label="Maat per categorie"><option value="bod">Som van de hoogste biedingen</option><option value="biedingen">Aantal biedingen</option><option value="gem">Gemiddeld bod per kavel met bod</option><option value="aandeel">Aandeel kavels met een bod</option></select>
+      </div>
+      <div class="chart" id="ch-cat"></div>
+    </div>
+    <div class="card">
+      <div class="head">
+        <div><h2>Topkavels</h2><p class="note">Klik op een balk voor de geschiedenis van die kavel.</p></div>
+        <div class="row">
+          <select id="c-top" aria-label="Rangschik op"><option value="bod">Hoogste bod</option><option value="biedingen">Meeste biedingen</option><option value="factor">Bod t.o.v. minimum</option><option value="erbij">Meeste biedingen erbij</option></select>
+          <select id="c-topn" aria-label="Aantal kavels"><option value="10">Top 10</option><option value="15">Top 15</option><option value="25">Top 25</option></select>
+        </div>
+      </div>
+      <div class="chart tall" id="ch-top"></div>
+    </div>
+    <div class="card wide">
+      <div class="head"><div><h2>Nieuwe biedingen per meting</h2><p class="note">Hoeveel biedingen er bij kwamen sinds de meting daarvoor. Tot 3 november 17:00 telt een balk 3 uur, daarna 15 minuten.</p></div></div>
+      <div class="chart" id="ch-act"></div>
+    </div>
+  </section>
+
+  <section class="card" id="kavels">
+    <div class="head"><div><h2>Alle kavels</h2><p class="note">Klik op een kavel voor de geschiedenis. Klik op een kolomkop om te sorteren.</p></div></div>
+    <div class="row" style="margin-bottom:10px">
+      <input type="search" id="q" placeholder="Zoek op kavelnummer of omschrijving" aria-label="Zoek kavel">
+      <label><input type="checkbox" id="f-changed"> Alleen gewijzigd sinds vorige meting</label>
+    </div>
+    <div class="scroll">
+      <table class="lots"><thead><tr>
+        <th data-k="kavel" aria-sort="ascending">Kavel</th><th data-k="titel">Omschrijving</th><th data-k="categorie" class="narrow-hide">Categorie</th>
+        <th data-k="minimum" class="r narrow-hide">Minimum</th><th data-k="hoogste_bod" class="r">Hoogste bod</th><th data-k="biedingen" class="r">Biedingen</th>
+        <th data-k="bod_erbij" class="r">Bod erbij</th><th data-k="laatste_wijziging" class="narrow-hide">Laatste wijziging</th><th data-k="sluit" class="narrow-hide">Sluit</th>
+      </tr></thead><tbody id="tb-lots"></tbody></table>
+    </div>
+  </section>
+
+  <section class="card" id="geschiedenis">
+    <div class="head">
+      <div><h2>Geschiedenis van de biedingen</h2><p class="note">Elke wijziging die een meting heeft gezien, nieuwste eerst. Biedingen tussen twee metingen in tellen op bij het aantal en zijn niet los zichtbaar.</p></div>
+      <button type="button" class="btn" id="all" hidden>Toon alle kavels</button>
+    </div>
+    <div class="scroll">
+      <table><thead><tr>
+        <th>Moment</th><th>Kavel</th><th class="narrow-hide">Omschrijving</th><th class="r">Bod voor</th><th class="r">Bod na</th>
+        <th class="r narrow-hide">Biedingen voor</th><th class="r">Biedingen na</th><th class="narrow-hide">Opmerking</th>
+      </tr></thead><tbody id="tb-hist"></tbody></table>
+      <p class="empty" id="no-hist" hidden>Nog geen wijzigingen gezien voor deze selectie.</p>
+    </div>
+  </section>
+
+  <p class="foot">Gegevens van de openbare veilingpagina op auctivo.net, automatisch gemeten. De categorieën zijn een eigen indeling. Pagina gemaakt <span id="generated"></span>; hij herlaadt elke 10 minuten.</p>
+</div>
+
+<script>
+const D = {"auctionUrl":"https://auctivo.net/nl/auction/b10e4c75-ae8c-4562-8f48-b853ec689a24","generated":"2026-11-02T09:37:31.215Z","rows":[{"soort":"kavel","kavel":1,"categorie":"Fietsen","titel":"Pointer, Horizon, fiets","link":"https://auctivo.net/nl/auction/b10e4c75-ae8c-4562-8f48-b853ec689a24/lot/991ae6c0-791c-47b2-b8c6-888b8eecef9d","minimum":10,"hoogste_bod":20,"biedingen":2,"bod_erbij":0,"biedingen_erbij":0,"laatste_wijziging":null,"sluit":"2026-11-10T18:00:00Z","open":true},{"soort":"kavel","kavel":2,"categorie":"Fietsen","titel":"Gazelle, Primeur Easyfiets, fiets","link":"https://auctivo.net/nl/auction/b10e4c75-ae8c-4562-8f48-b853ec689a24/lot/1a96cb6d-8c6b-41a0-8a96-867ade062977","minimum":10,"hoogste_bod":30,"biedingen":4,"bod_erbij":0,"biedingen_erbij":0,"laatste_wijziging":null,"sluit":"2026-11-10T18:00:00Z","open":true},{"soort":"kavel","kavel":3,"categorie":"Fietsen","titel":"Gazelle, Easyfiets, fiets","link":"https://auctivo.net/nl/auction/b10e4c75-ae8c-4562-8f48-b853ec689a24/lot/9cb88e50-4f46-4f79-8481-cdbcdaf7fd47","minimum":10,"hoogste_bod":27,"biedingen":6,"bod_erbij":0,"biedingen_erbij":0,"laatste_wijziging":null,"sluit":"2026-11-10T18:01:00Z","open":true},{"soort":"kavel","kavel":4,"categorie":"Fietsen","titel":"Batavus, Florence, fiets","link":"https://auctivo.net/nl/auction/b10e4c75-ae8c-4562-8f48-b853ec689a24/lot/18770301-2731-4d23-a0f4-58bf3db3cc8c","minimum":10,"hoogste_bod":25,"biedingen":5,"bod_erbij":0,"biedingen_erbij":0,"laatste_wijziging":null,"sluit":"2026-11-10T18:02:00Z","open":true},{"soort":"kavel","kavel":5,"categorie":"Fietsen","titel":"Altec Classic fiets","link":"https://auctivo.net/nl/auction/b10e4c75-ae8c-4562-8f48-b853ec689a24/lot/eb32a42b-7a04-4c38-a168-329e15c5a806","minimum":10,"hoogste_bod":20,"biedingen":3,"bod_erbij":0,"biedingen_erbij":0,"laatste_wijziging":null,"sluit":"2026-11-10T18:03:00Z","open":true},{"soort":"kavel","kavel":6,"categorie":"Fietsen","titel":"Roetz stadsfiets","link":"https://auctivo.net/nl/auction/b10e4c75-ae8c-4562-8f48-b853ec689a24/lot/2c102fd3-11d0-494e-ae37-8fd6cabd320c","minimum":10,"hoogste_bod":25,"biedingen":5,"bod_erbij":0,"biedingen_erbij":0,"laatste_wijziging":null,"sluit":"2026-11-10T18:04:00Z","open":true},{"soort":"kavel","kavel":7,"categorie":"Fietsen","titel":"Roetz fiets","link":"https://auctivo.net/nl/auction/b10e4c75-ae8c-4562-8f48-b853ec689a24/lot/bfd303ec-b111-4fb3-8d23-459ce06ec6c8","minimum":10,"hoogste_bod":25,"biedingen":3,"bod_erbij":0,"biedingen_erbij":0,"laatste_wijziging":null,"sluit":"2026-11-10T18:05:00Z","open":true},{"soort":"kavel","kavel":8,"categorie":"Fietsen","titel":"Roetz, fiets","link":"https://auctivo.net/nl/auction/b10e4c75-ae8c-4562-8f48-b853ec689a24/lot/1ed263e1-7e77-4cba-abf5-daca92d2ce58","minimum":10,"hoogste_bod":35,"biedingen":8,"bod_erbij":0,"biedingen_erbij":0,"laatste_wijziging":null,"sluit":"2026-11-10T18:05:00Z","open":true},{"soort":"kavel","kavel":9,"categorie":"Fietsen","titel":"Roetz, fiets met lage instap","link":"https://auctivo.net/nl/auction/b10e4c75-ae8c-4562-8f48-b853ec689a24/lot/66c25a2d-eac8-4f97-8d76-e32bd92da162","minimum":10,"hoogste_bod":35,"biedingen":4,"bod_erbij":0,"biedingen_erbij":0,"laatste_wijziging":null,"sluit":"2026-11-10T18:06:00Z","open":true},{"soort":"kavel","kavel":10,"categorie":"Fietsen","titel":"Roetz fiets","link":"https://auctivo.net/nl/auction/b10e4c75-ae8c-4562-8f48-b853ec689a24/lot/374fa54b-f3ac-455e-bddd-6e64f723fc74","minimum":10,"hoogste_bod":25,"biedingen":5,"bod_erbij":0,"biedingen_erbij":0,"laatste_wijziging":null,"sluit":"2026-11-10T18:07:30Z","open":true},{"soort":"kavel","kavel":11,"categorie":"Fietsen","titel":"EASY FITS OXFORD kinderfiets","link":"https://auctivo.net/nl/auction/b10e4c75-ae8c-4562-8f48-b853ec689a24/lot/ae2a0137-c8f5-4db3-a766-7eb91b7542f1","minimum":10,"hoogste_bod":12,"biedingen":1,"bod_erbij":0,"biedingen_erbij":0,"laatste_wijziging":null,"sluit":"2026-11-10T18:08:20Z","open":true},{"soort":"kavel","kavel":12,"categorie":"Fietsen","titel":"EASY FITS OXFORD kinderfiets","link":"https://auctivo.net/nl/auction/b10e4c75-ae8c-4562-8f48-b853ec689a24/lot/e4c3cd8e-e77b-4288-91dd-3b01bd1593ef","minimum":10,"hoogste_bod":12,"biedingen":1,"bod_erbij":0,"biedingen_erbij":0,"laatste_wijziging":null,"sluit":"2026-11-10T18:09:10Z","open":true},{"soort":"kavel","kavel":13,"categorie":"Fietsen","titel":"Oxford, Easy Fiets, kinderfiets","link":"https://auctivo.net/nl/auction/b10e4c75-ae8c-4562-8f48-b853ec689a24/lot/16a84375-b22c-4fcf-af5f-c1f5b7aead6f","minimum":10,"hoogste_bod":12,"biedingen":1,"bod_erbij":0,"biedingen_erbij":0,"laatste_wijziging":null,"sluit":"2026-11-10T18:10:00Z","open":true},{"soort":"kavel","kavel":14,"categorie":"Fietsen","titel":"Oxford, Easy Fiets, kinderfiets","link":"https://auctivo.net/nl/auction/b10e4c75-ae8c-4562-8f48-b853ec689a24/lot/206c3adb-b874-4a89-9aaf-002982808d79","minimum":10,"hoogste_bod":12,"biedingen":1,"bod_erbij":0,"biedingen_erbij":0,"laatste_wijziging":null,"sluit":"2026-11-10T18:10:50Z","open":true},{"soort":"kavel","kavel":15,"categorie":"Fietsen","titel":"Easyfiets, Wave, fiets","link":"https://auctivo.net/nl/auction/b10e4c75-ae8c-4562-8f48-b853ec689a24/lot/69bb79ae-e8b2-4af7-b7c0-dd535d12c25c","minimum":10,"hoogste_bod":12,"biedingen":1,"bod_erbij":0,"biedingen_erbij":0,"laatste_wijziging":null,"sluit":"2026-11-10T18:11:40Z","open":true},{"soort":"kavel","kavel":16,"categorie":"Fietsen","titel":"Batavia, Snake, fiets (26 inch)","link":"https://auctivo.net/nl/auction/b10e4c75-ae8c-4562-8f48-b853ec689a24/lot/f595c956-50ca-4754-923a-aa7b1b853b67","minimum":10,"hoogste_bod":29,"biedingen":5,"bod_erbij":0,"biedingen_erbij":0,"laatste_wijziging":null,"sluit":"2026-11-10T18:12:30Z","open":true},{"soort":"kavel","kavel":17,"categorie":"Fietsen","titel":"ALDO, WAVE, fiets","link":"https://auctivo.net/nl/auction/b10e4c75-ae8c-4562-8f48-b853ec689a24/lot/fb989674-48a5-4fa2-ab32-f0a078cbbde2","minimum":10,"hoogste_bod":0,"biedingen":0,"bod_erbij":0,"biedingen_erbij":0,"laatste_wijziging":null,"sluit":"2026-11-10T18:13:20Z","open":true},{"soort":"kavel","kavel":18,"categorie":"Fietsen","titel":"Babboe City bakfiets","link":"https://auctivo.net/nl/auction/b10e4c75-ae8c-4562-8f48-b853ec689a24/lot/06e749f7-12de-4270-bdd8-820f02ec504d","minimum":50,"hoogste_bod":500,"biedingen":25,"bod_erbij":0,"biedingen_erbij":0,"laatste_wijziging":null,"sluit":"2026-11-10T18:14:00Z","open":true},{"soort":"kavel","kavel":19,"categorie":"Fietsen","titel":"Union, Easy Fiets, fiets","link":"https://auctivo.net/nl/auction/b10e4c75-ae8c-4562-8f48-b853ec689a24/lot/41937e03-837a-411b-8e23-1445ace0a9b4","minimum":10,"hoogste_bod":12,"biedingen":2,"bod_erbij":0,"biedingen_erbij":0,"laatste_wijziging":null,"sluit":"2026-11-10T18:15:00Z","open":true},{"soort":"kavel","kavel":20,"categorie":"E-bikes","titel":"Elektrische fiets (1 stuks)","link":"https://auctivo.net/nl/auction/b10e4c75-ae8c-4562-8f48-b853ec689a24/lot/1e84cf1e-34fb-43b0-a842-67137510e061","minimum":20,"hoogste_bod":120,"biedingen":11,"bod_erbij":0,"biedingen_erbij":0,"laatste_wijziging":null,"sluit":"2026-11-10T18:15:50Z","open":true},{"soort":"kavel","kavel":21,"categorie":"Fietsen","titel":"Onderwater, tandemfiets","link":"https://auctivo.net/nl/auction/b10e4c75-ae8c-4562-8f48-b853ec689a24/lot/8922130e-1a31-4315-b3b1-c235bf4e5dda","minimum":10,"hoogste_bod":25,"biedingen":5,"bod_erbij":0,"biedingen_erbij":0,"laatste_wijziging":null,"sluit":"2026-11-10T18:16:40Z","open":true},{"soort":"kavel","kavel":22,"categorie":"Fietsen","titel":"Onderwater, tandemfiets","link":"https://auctivo.net/nl/auction/b10e4c75-ae8c-4562-8f48-b853ec689a24/lot/961eb9d6-8ea2-4817-a54b-cad7268846f6","minimum":10,"hoogste_bod":25,"biedingen":5,"bod_erbij":0,"biedingen_erbij":0,"laatste_wijziging":null,"sluit":"2026-11-10T18:17:30Z","open":true},{"soort":"kavel","kavel":23,"categorie":"Fietsen","titel":"Onderwater, tandemfiets","link":"https://auctivo.net/nl/auction/b10e4c75-ae8c-4562-8f48-b853ec689a24/lot/912fc224-434b-4d68-9553-4d1d236ff462","minimum":10,"hoogste_bod":16,"biedingen":3,"bod_erbij":0,"biedingen_erbij":0,"laatste_wijziging":null,"sluit":"2026-11-10T18:18:20Z","open":true},{"soort":"kavel","kavel":24,"categorie":"Fietsen","titel":"Onderwater, tandemfiets","link":"https://auctivo.net/nl/auction/b10e4c75-ae8c-4562-8f48-b853ec689a24/lot/0e2ae936-a32c-48a6-b8f8-18284154fe90","minimum":10,"hoogste_bod":18,"biedingen":4,"bod_erbij":0,"biedingen_erbij":0,"laatste_wijziging":null,"sluit":"2026-11-10T18:19:10Z","open":true},{"soort":"kavel","kavel":25,"categorie":"Fietsen","titel":"Onderwater, tandemfiets","link":"https://auctivo.net/nl/auction/b10e4c75-ae8c-4562-8f48-b853ec689a24/lot/ecf38bc5-43c4-4b85-9fd4-744304b32d1b","minimum":10,"hoogste_bod":20,"biedingen":4,"bod_erbij":0,"biedingen_erbij":0,"laatste_wijziging":null,"sluit":"2026-11-10T18:20:00Z","open":true},{"soort":"kavel","kavel":26,"categorie":"Fietsen","titel":"Onderwater, tandemfiets","link":"https://auctivo.net/nl/auction/b10e4c75-ae8c-4562-8f48-b853ec689a24/lot/ac649ce7-1d0f-4536-a49c-e5f42b7f774d","minimum":10,"hoogste_bod":20,"biedingen":4,"bod_erbij":0,"biedingen_erbij":0,"laatste_wijziging":null,"sluit":"2026-11-10T18:20:50Z","open":true},{"soort":"kavel","kavel":27,"categorie":"Fietsen","titel":"Onderwater, tandemfiets","link":"https://auctivo.net/nl/auction/b10e4c75-ae8c-4562-8f48-b853ec689a24/lot/031bbbce-bf0f-4610-ba02-544f231ab228","minimum":10,"hoogste_bod":25,"biedingen":4,"bod_erbij":0,"biedingen_erbij":0,"laatste_wijziging":null,"sluit":"2026-11-10T18:21:40Z","open":true},{"soort":"kavel","kavel":28,"categorie":"Fietsen","titel":"Onderwater, tandemfiets","link":"https://auctivo.net/nl/auction/b10e4c75-ae8c-4562-8f48-b853ec689a24/lot/f48cccbe-c1ea-492a-ab9e-5e39b2233a79","minimum":10,"hoogste_bod":25,"biedingen":4,"bod_erbij":0,"biedingen_erbij":0,"laatste_wijziging":null,"sluit":"2026-11-10T18:22:30Z","open":true},{"soort":"kavel","kavel":29,"categorie":"Fietsen","titel":"Onderwater tandemfiets","link":"https://auctivo.net/nl/auction/b10e4c75-ae8c-4562-8f48-b853ec689a24/lot/4d942222-921a-4557-bbf8-22cb7c84b968","minimum":10,"hoogste_bod":16,"biedingen":4,"bod_erbij":0,"biedingen_erbij":0,"laatste_wijziging":null,"sluit":"2026-11-10T18:23:20Z","open":true},{"soort":"kavel","kavel":30,"categorie":"Fietsen","titel":"Onderwater tandemfiets","link":"https://auctivo.net/nl/auction/b10e4c75-ae8c-4562-8f48-b853ec689a24/lot/57ac5e3b-2295-49f8-89f3-78bce34b124e","minimum":10,"hoogste_bod":12,"biedingen":2,"bod_erbij":0,"biedingen_erbij":0,"laatste_wijziging":null,"sluit":"2026-11-10T18:24:10Z","open":true},{"soort":"kavel","kavel":31,"categorie":"Fietsen","titel":"Onderwater tandemfiets","link":"https://auctivo.net/nl/auction/b10e4c75-ae8c-4562-8f48-b853ec689a24/lot/bee37884-c71c-4c6a-9204-f002003e3814","minimum":10,"hoogste_bod":12,"biedingen":2,"bod_erbij":0,"biedingen_erbij":0,"laatste_wijziging":null,"sluit":"2026-11-10T18:25:00Z","open":true},{"soort":"kavel","kavel":32,"categorie":"Fietsen","titel":"Onderwater tandemfiets","link":"https://auctivo.net/nl/auction/b10e4c75-ae8c-4562-8f48-b853ec689a24/lot/53836483-6c25-4fc6-9140-454e2a89a993","minimum":10,"hoogste_bod":12,"biedingen":2,"bod_erbij":0,"biedingen_erbij":0,"laatste_wijziging":null,"sluit":"2026-11-10T18:25:50Z","open":true},{"soort":"kavel","kavel":33,"categorie":"Fietsen","titel":"Oudewater, Tandemfiets","link":"https://auctivo.net/nl/auction/b10e4c75-ae8c-4562-8f48-b853ec689a24/lot/32825a10-fa40-41fa-8873-8607be52f8d7","minimum":10,"hoogste_bod":25,"biedingen":3,"bod_erbij":0,"biedingen_erbij":0,"laatste_wijziging":null,"sluit":"2026-11-10T18:26:40Z","open":true},{"soort":"kavel","kavel":34,"categorie":"Fietsen","titel":"Bicklander transportfiets","link":"https://auctivo.net/nl/auction/b10e4c75-ae8c-4562-8f48-b853ec689a24/lot/fd25295c-bc43-436d-94fa-f4e381c8fcf6","minimum":1,"hoogste_bod":15,"biedingen":6,"bod_erbij":0,"biedingen_erbij":0,"laatste_wijziging":null,"sluit":"2026-11-10T18:27:30Z","open":true},{"soort":"kavel","kavel":35,"categorie":"Fietsen","titel":"Cortina, Contour, stadsfiets","link":"https://auctivo.net/nl/auction/b10e4c75-ae8c-4562-8f48-b853ec689a24/lot/3b72ba8a-5eb9-437f-97f9-3615bf639abf","minimum":10,"hoogste_bod":110,"biedingen":25,"bod_erbij":0,"biedingen_erbij":0,"laatste_wijziging":null,"sluit":"2026-11-10T18:28:20Z","open":true},{"soort":"kavel","kavel":36,"categorie":"Fietsen","titel":"Cumberland, fiets","link":"https://auctivo.net/nl/auction/b10e4c75-ae8c-4562-8f48-b853ec689a24/lot/b7905338-9d83-4b34-a63a-7b84b4378e26","minimum":10,"hoogste_bod":25,"biedingen":6,"bod_erbij":0,"biedingen_erbij":0,"laatste_wijziging":null,"sluit":"2026-11-10T18:29:10Z","open":true},{"soort":"kavel","kavel":37,"categorie":"Fietsen","titel":"Roetz fiets","link":"https://auctivo.net/nl/auction/b10e4c75-ae8c-4562-8f48-b853ec689a24/lot/0b3a46af-0c96-4969-bbc0-6a1b326d6d0e","minimum":10,"hoogste_bod":10,"biedingen":1,"bod_erbij":0,"biedingen_erbij":0,"laatste_wijziging":null,"sluit":"2026-11-10T18:30:00Z","open":true},{"soort":"kavel","kavel":38,"categorie":"Fietsen","titel":"Roetz fiets","link":"https://auctivo.net/nl/auction/b10e4c75-ae8c-4562-8f48-b853ec689a24/lot/5352f215-f77d-4b86-af2d-1944cd01a3fd","minimum":10,"hoogste_bod":12,"biedingen":1,"bod_erbij":0,"biedingen_erbij":0,"laatste_wijziging":null,"sluit":"2026-11-10T18:30:50Z","open":true},{"soort":"kavel","kavel":39,"categorie":"Fietsen","titel":"Bayck, fiets","link":"https://auctivo.net/nl/auction/b10e4c75-ae8c-4562-8f48-b853ec689a24/lot/4897660c-f372-404f-84f5-7d6576d5a2e5","minimum":20,"hoogste_bod":70,"biedingen":11,"bod_erbij":0,"biedingen_erbij":0,"laatste_wijziging":null,"sluit":"2026-11-10T18:31:40Z","open":true},{"soort":"kavel","kavel":40,"categorie":"Fietsen","titel":"Bayck, fiets","link":"https://auctivo.net/nl/auction/b10e4c75-ae8c-4562-8f48-b853ec689a24/lot/9ffafbd7-7621-447c-b6e2-9d1d5b2606a7","minimum":20,"hoogste_bod":55,"biedingen":8,"bod_erbij":0,"biedingen_erbij":0,"laatste_wijziging":null,"sluit":"2026-11-10T18:32:30Z","open":true},{"soort":"kavel","kavel":41,"categorie":"Fietsen","titel":"Bayck, fiets","link":"https://auctivo.net/nl/auction/b10e4c75-ae8c-4562-8f48-b853ec689a24/lot/cbb1dd7b-4eed-4f91-9b41-3e174009a49e","minimum":20,"hoogste_bod":50,"biedingen":7,"bod_erbij":0,"biedingen_erbij":0,"laatste_wijziging":null,"sluit":"2026-11-10T18:33:20Z","open":true},{"soort":"kavel","kavel":42,"categorie":"Fietsen","titel":"Bayck, fiets","link":"https://auctivo.net/nl/auction/b10e4c75-ae8c-4562-8f48-b853ec689a24/lot/1f5b3046-6ff9-402a-8c48-df732f5903b7","minimum":20,"hoogste_bod":65,"biedingen":10,"bod_erbij":0,"biedingen_erbij":0,"laatste_wijziging":null,"sluit":"2026-11-10T18:34:10Z","open":true},{"soort":"kavel","kavel":43,"categorie":"Fietsen","titel":"Bayck, fiets","link":"https://auctivo.net/nl/auction/b10e4c75-ae8c-4562-8f48-b853ec689a24/lot/21deba67-d59c-4f9c-9bbe-f56f53ff147f","minimum":20,"hoogste_bod":70,"biedingen":9,"bod_erbij":0,"biedingen_erbij":0,"laatste_wijziging":null,"sluit":"2026-11-10T18:35:00Z","open":true},{"soort":"kavel","kavel":44,"categorie":"E-bikes","titel":"Bavyck, elektrische fiets (schade)","link":"https://auctivo.net/nl/auction/b10e4c75-ae8c-4562-8f48-b853ec689a24/lot/e29b0fcb-2056-4376-95e2-319d2c563442","minimum":25,"hoogste_bod":30,"biedingen":2,"bod_erbij":0,"biedingen_erbij":0,"laatste_wijziging":null,"sluit":"2026-11-10T18:35:00Z","open":true},{"soort":"kavel","kavel":45,"categorie":"E-bikes","titel":"Bavyck, elektrische fiets (schade)","link":"https://auctivo.net/nl/auction/b10e4c75-ae8c-4562-8f48-b853ec689a24/lot/411a7c58-2ca5-4a0c-9a83-ce8b8ab8045a","minimum":25,"hoogste_bod":35,"biedingen":1,"bod_erbij":0,"biedingen_erbij":0,"laatste_wijziging":null,"sluit":"2026-11-10T18:36:40Z","open":true},{"soort":"kavel","kavel":46,"categorie":"E-bikes","titel":"Bavyck, elektrische fiets (schade)","link":"https://auctivo.net/nl/auction/b10e4c75-ae8c-4562-8f48-b853ec689a24/lot/803a8782-f763-4481-893f-5554b39003c0","minimum":25,"hoogste_bod":0,"biedingen":0,"bod_erbij":0,"biedingen_erbij":0,"laatste_wijziging":null,"sluit":"2026-11-10T18:37:30Z","open":true},{"soort":"kavel","kavel":47,"categorie":"E-bikes","titel":"Bavyck, elektrische fiets (schade)","link":"https://auctivo.net/nl/auction/b10e4c75-ae8c-4562-8f48-b853ec689a24/lot/e1322c7b-7f29-425e-a432-8ce623c9d2a4","minimum":25,"hoogste_bod":0,"biedingen":0,"bod_erbij":0,"biedingen_erbij":0,"laatste_wijziging":null,"sluit":"2026-11-10T18:38:20Z","open":true},{"soort":"kavel","kavel":48,"categorie":"E-bikes","titel":"Bavyck, elektrische fiets (schade)","link":"https://auctivo.net/nl/auction/b10e4c75-ae8c-4562-8f48-b853ec689a24/lot/c5022767-dbd0-4794-b8b9-3145c52bd32c","minimum":25,"hoogste_bod":25,"biedingen":1,"bod_erbij":0,"biedingen_erbij":0,"laatste_wijziging":null,"sluit":"2026-11-10T18:39:10Z","open":true},{"soort":"kavel","kavel":49,"categorie":"E-bikes","titel":"Bavyck, elektrische fiets (schade)","link":"https://auctivo.net/nl/auction/b10e4c75-ae8c-4562-8f48-b853ec689a24/lot/b9086689-7cab-40b9-8da4-648d8cf8b218","minimum":25,"hoogste_bod":0,"biedingen":0,"bod_erbij":0,"biedingen_erbij":0,"laatste_wijziging":null,"sluit":"2026-11-10T18:40:00Z","open":true},{"soort":"kavel","kavel":50,"categorie":"E-bikes","titel":"Bavyck, elektrische fiets (schade)","link":"https://auctivo.net/nl/auction/b10e4c75-ae8c-4562-8f48-b853ec689a24/lot/efbd856c-f460-4b7b-9cd8-f6f837a2ae4f","minimum":25,"hoogste_bod":0,"biedingen":0,"bod_erbij":0,"biedingen_erbij":0,"laatste_wijziging":null,"sluit":"2026-11-10T18:40:50Z","open":true},{"soort":"kavel","kavel":51,"categorie":"E-bikes","titel":"Bavyck, elektrische fiets (schade)","link":"https://auctivo.net/nl/auction/b10e4c75-ae8c-4562-8f48-b853ec689a24/lot/03ebfe7e-a246-430b-b7d0-52fdc8d1ce2f","minimum":25,"hoogste_bod":0,"biedingen":0,"bod_erbij":0,"biedingen_erbij":0,"laatste_wijziging":null,"sluit":"2026-11-10T18:41:40Z","open":true},{"soort":"kavel","kavel":52,"categorie":"E-bikes","titel":"Bavyck, elektrische fiets (schade)","link":"https://auctivo.net/nl/auction/b10e4c75-ae8c-4562-8f48-b853ec689a24/lot/fab61bf0-cd45-4180-af9d-8e60a73cbff9","minimum":25,"hoogste_bod":25,"biedingen":1,"bod_erbij":0,"biedingen_erbij":0,"laatste_wijziging":null,"sluit":"2026-11-10T18:42:30Z","open":true},{"soort":"kavel","kavel":53,"categorie":"E-bikes","titel":"Bayck, elektrische fiets (defect)","link":"https://auctivo.net/nl/auction/b10e4c75-ae8c-4562-8f48-b853ec689a24/lot/9ffb3dd2-90d0-4e4b-872e-b78b269aa60f","minimum":25,"hoogste_bod":0,"biedingen":0,"bod_erbij":0,"biedingen_erbij":0,"laatste_wijziging":null,"sluit":"2026-11-10T18:43:20Z","open":true},{"soort":"kavel","kavel":54,"categorie":"E-bikes","titel":"Bayck, elektrische fiets (defect)","link":"https://auctivo.net/nl/auction/b10e4c75-ae8c-4562-8f48-b853ec689a24/lot/5983717f-7929-44e5-95c2-bc1441a3fcdd","minimum":25,"hoogste_bod":25,"biedingen":1,"bod_erbij":0,"biedingen_erbij":0,"laatste_wijziging":null,"sluit":"2026-11-10T18:44:10Z","open":true},{"soort":"kavel","kavel":55,"categorie":"E-bikes","titel":"Bayck, elektrische fiets (defect)","link":"https://auctivo.net/nl/auction/b10e4c75-ae8c-4562-8f48-b853ec689a24/lot/236948a3-e0c8-4466-be0e-c028c76ec0ca","minimum":25,"hoogste_bod":0,"biedingen":0,"bod_erbij":0,"biedingen_erbij":0,"laatste_wijziging":null,"sluit":"2026-11-10T18:45:00Z","open":true},{"soort":"kavel","kavel":56,"categorie":"E-bikes","titel":"Bayck, elektrische fiets (defect)","link":"https://auctivo.net/nl/auction/b10e4c75-ae8c-4562-8f48-b853ec689a24/lot/674f06fd-3072-435e-a2a0-770ad50dd36d","minimum":25,"hoogste_bod":0,"biedingen":0,"bod_erbij":0,"biedingen_erbij":0,"laatste_wijziging":null,"sluit":"2026-11-10T18:45:50Z","open":true},{"soort":"kavel","kavel":57,"categorie":"E-bikes","titel":"Bayck, elektrische fiets (defect)","link":"https://auctivo.net/nl/auction/b10e4c75-ae8c-4562-8f48-b853ec689a24/lot/dafc1cf6-a05f-47a8-9f73-a996f8e76176","minimum":25,"hoogste_bod":0,"biedingen":0,"bod_erbij":0,"biedingen_erbij":0,"laatste_wijziging":null,"sluit":"2026-11-10T18:46:40Z","open":true},{"soort":"kavel","kavel":58,"categorie":"E-bikes","titel":"Bayck, elektrische fiets (defect)","link":"https://auctivo.net/nl/auction/b10e4c75-ae8c-4562-8f48-b853ec689a24/lot/737f5ad5-b9ca-4fd3-91ef-d0c579e0ce55","minimum":25,"hoogste_bod":30,"biedingen":2,"bod_erbij":0,"biedingen_erbij":0,"laatste_wijziging":null,"sluit":"2026-11-10T18:47:30Z","open":true},{"soort":"kavel","kavel":59,"categorie":"E-bikes","titel":"Bayck, elektrische fiets (defect)","link":"https://auctivo.net/nl/auction/b10e4c75-ae8c-4562-8f48-b853ec689a24/lot/a6f0928b-388c-457c-a2f5-77eda2460c87","minimum":25,"hoogste_bod":50,"biedingen":1,"bod_erbij":0,"biedingen_erbij":0,"laatste_wijziging":null,"sluit":"2026-11-10T18:48:20Z","open":true},{"soort":"kavel","kavel":60,"categorie":"E-bikes","titel":"Bayck, elektrische fiets (defect)","link":"https://auctivo.net/nl/auction/b10e4c75-ae8c-4562-8f48-b853ec689a24/lot/d9b21d16-e4e0-4d44-bb93-660099fe6d97","minimum":25,"hoogste_bod":25,"biedingen":1,"bod_erbij":0,"biedingen_erbij":0,"laatste_wijziging":null,"sluit":"2026-11-10T18:49:10Z","open":true},{"soort":"kavel","kavel":61,"categorie":"Onderdelen & accessoires","titel":"Partij fietsonderdelen","link":"https://auctivo.net/nl/auction/b10e4c75-ae8c-4562-8f48-b853ec689a24/lot/16de838f-cc4a-4460-9e4b-d21fb4b44f3a","minimum":10,"hoogste_bod":0,"biedingen":0,"bod_erbij":0,"biedingen_erbij":0,"laatste_wijziging":null,"sluit":"2026-11-10T18:50:00Z","open":true},{"soort":"kavel","kavel":62,"categorie":"Onderdelen & accessoires","titel":"EasyFiets, rode fietszadels (ca. 150 stuks)","link":"https://auctivo.net/nl/auction/b10e4c75-ae8c-4562-8f48-b853ec689a24/lot/ae6775b0-d83e-4ab0-9458-a1d25506a6ed","minimum":10,"hoogste_bod":103,"biedingen":16,"bod_erbij":0,"biedingen_erbij":0,"laatste_wijziging":null,"sluit":"2026-11-10T18:50:50Z","open":true},{"soort":"kavel","kavel":63,"categorie":"Onderdelen & accessoires","titel":"EASYFIETS.nl defecte accu's (11 stuks)","link":"https://auctivo.net/nl/auction/b10e4c75-ae8c-4562-8f48-b853ec689a24/lot/67b7385f-0a78-4436-ab9b-bb332f581a45","minimum":10,"hoogste_bod":0,"biedingen":0,"bod_erbij":0,"biedingen_erbij":0,"laatste_wijziging":null,"sluit":"2026-11-10T18:51:40Z","open":true},{"soort":"kavel","kavel":80,"categorie":"Onderdelen & accessoires","titel":"Polisport BILBY MAXI kinderzitje + New Looxs mand + Basil krat","link":"https://auctivo.net/nl/auction/b10e4c75-ae8c-4562-8f48-b853ec689a24/lot/4724f279-0e1b-42ac-b960-33764b17b3e5","minimum":10,"hoogste_bod":12,"biedingen":2,"bod_erbij":0,"biedingen_erbij":0,"laatste_wijziging":null,"sluit":"2026-11-10T18:52:30Z","open":true},{"soort":"kavel","kavel":81,"categorie":"Onderdelen & accessoires","titel":"AXA / Stahlex / FALX, fietssloten","link":"https://auctivo.net/nl/auction/b10e4c75-ae8c-4562-8f48-b853ec689a24/lot/4e9e595d-fff5-49fd-9954-82949b0925b1","minimum":10,"hoogste_bod":18,"biedingen":5,"bod_erbij":0,"biedingen_erbij":0,"laatste_wijziging":null,"sluit":"2026-11-10T18:53:20Z","open":true},{"soort":"kavel","kavel":82,"categorie":"Kantoor & inrichting","titel":"Stoeltjes met kast op wieltjes (5 stoeltjes)","link":"https://auctivo.net/nl/auction/b10e4c75-ae8c-4562-8f48-b853ec689a24/lot/f70a48eb-fa44-400f-944b-eb7880f359bf","minimum":10,"hoogste_bod":0,"biedingen":0,"bod_erbij":0,"biedingen_erbij":0,"laatste_wijziging":null,"sluit":"2026-11-10T18:54:10Z","open":true},{"soort":"kavel","kavel":83,"categorie":"Onderdelen & accessoires","titel":"Fietshelmen (31 stuks)","link":"https://auctivo.net/nl/auction/b10e4c75-ae8c-4562-8f48-b853ec689a24/lot/9a538c3e-c7f8-4224-86c0-595c4e63462a","minimum":5,"hoogste_bod":7,"biedingen":2,"bod_erbij":0,"biedingen_erbij":0,"laatste_wijziging":null,"sluit":"2026-11-10T18:55:00Z","open":true},{"soort":"kavel","kavel":84,"categorie":"Werkplaats & gereedschap","titel":"Salvus, L1 8/10, lithium-ion batterijkast","link":"https://auctivo.net/nl/auction/b10e4c75-ae8c-4562-8f48-b853ec689a24/lot/a7405fea-3d6b-4ccb-964b-0ad54499a7ac","minimum":10,"hoogste_bod":50,"biedingen":7,"bod_erbij":0,"biedingen_erbij":0,"laatste_wijziging":null,"sluit":"2026-11-10T18:55:50Z","open":true},{"soort":"kavel","kavel":85,"categorie":"Transport & overig","titel":"TOOLPORT vouwpaviljoen (ca. 287 x 287 cm)","link":"https://auctivo.net/nl/auction/b10e4c75-ae8c-4562-8f48-b853ec689a24/lot/15834b0f-4f5d-4fb8-ac2c-0d1a1e54fa58","minimum":25,"hoogste_bod":30,"biedingen":2,"bod_erbij":0,"biedingen_erbij":0,"laatste_wijziging":null,"sluit":"2026-11-10T18:56:40Z","open":true},{"soort":"kavel","kavel":86,"categorie":"Kantoor & inrichting","titel":"METRO PROFESSIONAL, GPC1046, koelkast","link":"https://auctivo.net/nl/auction/b10e4c75-ae8c-4562-8f48-b853ec689a24/lot/cbbdc3a5-6956-4021-b123-4bc5b7b7664f","minimum":10,"hoogste_bod":35,"biedingen":10,"bod_erbij":0,"biedingen_erbij":0,"laatste_wijziging":null,"sluit":"2026-11-10T18:57:30Z","open":true},{"soort":"kavel","kavel":87,"categorie":"Werkplaats & gereedschap","titel":"Super B TB-F30 wielrichter met werkbank en onderdelenbakjes","link":"https://auctivo.net/nl/auction/b10e4c75-ae8c-4562-8f48-b853ec689a24/lot/7082deea-0619-43e7-aec7-149ab6b9f87b","minimum":25,"hoogste_bod":45,"biedingen":4,"bod_erbij":0,"biedingen_erbij":0,"laatste_wijziging":null,"sluit":"2026-11-10T18:58:20Z","open":true},{"soort":"kavel","kavel":88,"categorie":"Kantoor & inrichting","titel":"Balie met inhoud (ca. 185 x 68 x 92 cm)","link":"https://auctivo.net/nl/auction/b10e4c75-ae8c-4562-8f48-b853ec689a24/lot/76776f62-575d-44e8-a6d3-3875381910f7","minimum":10,"hoogste_bod":10,"biedingen":1,"bod_erbij":0,"biedingen_erbij":0,"laatste_wijziging":null,"sluit":"2026-11-10T18:59:10Z","open":true},{"soort":"kavel","kavel":89,"categorie":"Kantoor & inrichting","titel":"iiyama ProLite B2280WSD + AOC E2275PWJ, monitors (2)","link":"https://auctivo.net/nl/auction/b10e4c75-ae8c-4562-8f48-b853ec689a24/lot/12e0df7d-56c8-45bc-805d-d9f66b1e36e0","minimum":10,"hoogste_bod":10,"biedingen":1,"bod_erbij":0,"biedingen_erbij":0,"laatste_wijziging":null,"sluit":"2026-11-10T19:00:00Z","open":true},{"soort":"kavel","kavel":90,"categorie":"Kantoor & inrichting","titel":"HP, OfficeJet Pro 6970, multifunctionele printer","link":"https://auctivo.net/nl/auction/b10e4c75-ae8c-4562-8f48-b853ec689a24/lot/80020913-ea2e-4bd7-91e0-121f8f219bc8","minimum":5,"hoogste_bod":9,"biedingen":3,"bod_erbij":0,"biedingen_erbij":0,"laatste_wijziging":null,"sluit":"2026-11-10T19:00:50Z","open":true},{"soort":"kavel","kavel":91,"categorie":"Werkplaats & gereedschap","titel":"Werktafel met gereedschap en assortimentsbakken","link":"https://auctivo.net/nl/auction/b10e4c75-ae8c-4562-8f48-b853ec689a24/lot/19428701-1184-4864-b103-16eb1f313756","minimum":10,"hoogste_bod":55,"biedingen":11,"bod_erbij":0,"biedingen_erbij":0,"laatste_wijziging":null,"sluit":"2026-11-10T19:01:40Z","open":true},{"soort":"kavel","kavel":92,"categorie":"Werkplaats & gereedschap","titel":"HBM, PA 250D, elektrische takel","link":"https://auctivo.net/nl/auction/b10e4c75-ae8c-4562-8f48-b853ec689a24/lot/e082ae96-ff28-4978-9ff9-aea2bd72d426","minimum":10,"hoogste_bod":57,"biedingen":8,"bod_erbij":0,"biedingen_erbij":0,"laatste_wijziging":null,"sluit":"2026-11-10T19:02:30Z","open":true},{"soort":"kavel","kavel":93,"categorie":"Werkplaats & gereedschap","titel":"HBM, PA 250D, elektrische takel","link":"https://auctivo.net/nl/auction/b10e4c75-ae8c-4562-8f48-b853ec689a24/lot/97d1613a-d8e1-4e60-9494-25f400c59273","minimum":10,"hoogste_bod":16,"biedingen":3,"bod_erbij":0,"biedingen_erbij":0,"laatste_wijziging":null,"sluit":"2026-11-10T19:03:20Z","open":true},{"soort":"kavel","kavel":94,"categorie":"Werkplaats & gereedschap","titel":"HBM, PA 250D, elektrische takel","link":"https://auctivo.net/nl/auction/b10e4c75-ae8c-4562-8f48-b853ec689a24/lot/80e552e2-af92-4e5f-846b-e78c17ddc167","minimum":10,"hoogste_bod":50,"biedingen":1,"bod_erbij":0,"biedingen_erbij":0,"laatste_wijziging":null,"sluit":"2026-11-10T19:04:10Z","open":true},{"soort":"kavel","kavel":95,"categorie":"Werkplaats & gereedschap","titel":"HBM, PA 250D, elektrische takel","link":"https://auctivo.net/nl/auction/b10e4c75-ae8c-4562-8f48-b853ec689a24/lot/2e4007df-45a9-477b-856d-ded1f581cfc8","minimum":10,"hoogste_bod":32,"biedingen":9,"bod_erbij":0,"biedingen_erbij":0,"laatste_wijziging":null,"sluit":"2026-11-10T19:05:00Z","open":true},{"soort":"kavel","kavel":96,"categorie":"Werkplaats & gereedschap","titel":"HBM, PA 250D, elektrische takel","link":"https://auctivo.net/nl/auction/b10e4c75-ae8c-4562-8f48-b853ec689a24/lot/5fd6c7be-a6d8-4823-a094-7168ee9e3a66","minimum":10,"hoogste_bod":22,"biedingen":5,"bod_erbij":0,"biedingen_erbij":0,"laatste_wijziging":null,"sluit":"2026-11-10T19:05:50Z","open":true},{"soort":"kavel","kavel":97,"categorie":"Werkplaats & gereedschap","titel":"Werktafel met gereedschapswand en handgereedschap","link":"https://auctivo.net/nl/auction/b10e4c75-ae8c-4562-8f48-b853ec689a24/lot/11515753-5e19-4918-9923-50623e56a9ab","minimum":10,"hoogste_bod":165,"biedingen":11,"bod_erbij":0,"biedingen_erbij":0,"laatste_wijziging":null,"sluit":"2026-11-10T19:06:40Z","open":true},{"soort":"kavel","kavel":98,"categorie":"Werkplaats & gereedschap","titel":"Gereedschapswand met handgereedschap","link":"https://auctivo.net/nl/auction/b10e4c75-ae8c-4562-8f48-b853ec689a24/lot/178a27e7-bef9-446d-a7e4-9ba68a624612","minimum":10,"hoogste_bod":18,"biedingen":3,"bod_erbij":0,"biedingen_erbij":0,"laatste_wijziging":null,"sluit":"2026-11-10T19:07:30Z","open":true},{"soort":"kavel","kavel":99,"categorie":"Werkplaats & gereedschap","titel":"Powerplus werktafel met gereedschap en Beta mat","link":"https://auctivo.net/nl/auction/b10e4c75-ae8c-4562-8f48-b853ec689a24/lot/2ea7f677-5751-4988-8fbe-de3da0cde1cb","minimum":10,"hoogste_bod":200,"biedingen":11,"bod_erbij":0,"biedingen_erbij":0,"laatste_wijziging":null,"sluit":"2026-11-10T19:08:00Z","open":true},{"soort":"kavel","kavel":100,"categorie":"Werkplaats & gereedschap","titel":"Diverse handgereedschappen","link":"https://auctivo.net/nl/auction/b10e4c75-ae8c-4562-8f48-b853ec689a24/lot/a7673541-002b-4028-99a3-194573e6f667","minimum":10,"hoogste_bod":110,"biedingen":20,"bod_erbij":0,"biedingen_erbij":0,"laatste_wijziging":null,"sluit":"2026-11-10T19:09:10Z","open":true},{"soort":"kavel","kavel":101,"categorie":"Werkplaats & gereedschap","titel":"HBM werkbank met gereedschap en mat","link":"https://auctivo.net/nl/auction/b10e4c75-ae8c-4562-8f48-b853ec689a24/lot/1b858a72-ed7a-47fb-aa01-fa4308a544f9","minimum":10,"hoogste_bod":18,"biedingen":5,"bod_erbij":0,"biedingen_erbij":0,"laatste_wijziging":null,"sluit":"2026-11-10T19:10:00Z","open":true},{"soort":"kavel","kavel":102,"categorie":"Onderdelen & accessoires","titel":"Voorvorken en bagagedragers (ca. 20 + ca. 20)","link":"https://auctivo.net/nl/auction/b10e4c75-ae8c-4562-8f48-b853ec689a24/lot/ebe24746-2039-4fb5-94e6-65f54908868d","minimum":10,"hoogste_bod":25,"biedingen":3,"bod_erbij":0,"biedingen_erbij":0,"laatste_wijziging":null,"sluit":"2026-11-10T19:10:50Z","open":true},{"soort":"kavel","kavel":103,"categorie":"Kantoor & inrichting","titel":"Lenovo, LT1952pWD, monitor met randapparatuur","link":"https://auctivo.net/nl/auction/b10e4c75-ae8c-4562-8f48-b853ec689a24/lot/1d34b2bc-8591-4d71-bcf2-e22e95f9c466","minimum":10,"hoogste_bod":20,"biedingen":6,"bod_erbij":0,"biedingen_erbij":0,"laatste_wijziging":null,"sluit":"2026-11-10T19:11:40Z","open":true},{"soort":"kavel","kavel":104,"categorie":"Werkplaats & gereedschap","titel":"Stelling met gereedschap, onderdelen en ladekasten","link":"https://auctivo.net/nl/auction/b10e4c75-ae8c-4562-8f48-b853ec689a24/lot/29e6a13c-11bd-4a0f-9005-7c0231b56e82","minimum":10,"hoogste_bod":39,"biedingen":8,"bod_erbij":0,"biedingen_erbij":0,"laatste_wijziging":null,"sluit":"2026-11-10T19:12:30Z","open":true},{"soort":"kavel","kavel":105,"categorie":"Onderdelen & accessoires","titel":"Fietsbanden en velgen (ca. 43 stuks)","link":"https://auctivo.net/nl/auction/b10e4c75-ae8c-4562-8f48-b853ec689a24/lot/b00e4fac-c7db-4d82-8540-ff9b2dd62f1e","minimum":10,"hoogste_bod":12,"biedingen":2,"bod_erbij":0,"biedingen_erbij":0,"laatste_wijziging":null,"sluit":"2026-11-10T19:13:20Z","open":true},{"soort":"kavel","kavel":106,"categorie":"Magazijn & stellingen","titel":"Diverse rolcontainers met metaal, kratten en fietstassen","link":"https://auctivo.net/nl/auction/b10e4c75-ae8c-4562-8f48-b853ec689a24/lot/ffa25464-1ee0-4eb7-9a7c-8ad7c7e2101e","minimum":10,"hoogste_bod":0,"biedingen":0,"bod_erbij":0,"biedingen_erbij":0,"laatste_wijziging":null,"sluit":"2026-11-10T19:14:10Z","open":true},{"soort":"kavel","kavel":107,"categorie":"Werkplaats & gereedschap","titel":"IceToolz gereedschapsbord met handgereedschap","link":"https://auctivo.net/nl/auction/b10e4c75-ae8c-4562-8f48-b853ec689a24/lot/13286fcf-bdcf-4159-b620-b3dac1b65490","minimum":10,"hoogste_bod":16,"biedingen":4,"bod_erbij":0,"biedingen_erbij":0,"laatste_wijziging":null,"sluit":"2026-11-10T19:15:00Z","open":true},{"soort":"kavel","kavel":108,"categorie":"Werkplaats & gereedschap","titel":"HBM werkbank met gereedschap en mat","link":"https://auctivo.net/nl/auction/b10e4c75-ae8c-4562-8f48-b853ec689a24/lot/2389e8c3-71d2-44d8-97d4-a1cf44409342","minimum":10,"hoogste_bod":115,"biedingen":8,"bod_erbij":0,"biedingen_erbij":0,"laatste_wijziging":null,"sluit":"2026-11-10T19:15:00Z","open":true},{"soort":"kavel","kavel":109,"categorie":"Magazijn & stellingen","titel":"Metalen stelling met rode magazijnbakken met inhoud","link":"https://auctivo.net/nl/auction/b10e4c75-ae8c-4562-8f48-b853ec689a24/lot/3eea3e49-a275-479b-82f9-39d6da403020","minimum":10,"hoogste_bod":12,"biedingen":2,"bod_erbij":0,"biedingen_erbij":0,"laatste_wijziging":null,"sluit":"2026-11-10T19:16:40Z","open":true},{"soort":"kavel","kavel":110,"categorie":"Onderdelen & accessoires","titel":"Diverse stuurbochten (meerdere stuks)","link":"https://auctivo.net/nl/auction/b10e4c75-ae8c-4562-8f48-b853ec689a24/lot/5bccdb5c-7670-437f-b030-e2260fc5ef34","minimum":5,"hoogste_bod":0,"biedingen":0,"bod_erbij":0,"biedingen_erbij":0,"laatste_wijziging":null,"sluit":"2026-11-10T19:17:30Z","open":true},{"soort":"kavel","kavel":111,"categorie":"Onderdelen & accessoires","titel":"Schwalbe fietsbanden (ca. 35 stuks)","link":"https://auctivo.net/nl/auction/b10e4c75-ae8c-4562-8f48-b853ec689a24/lot/9be695f8-1438-4e32-9424-cccfc8dbd3ad","minimum":5,"hoogste_bod":78,"biedingen":16,"bod_erbij":0,"biedingen_erbij":0,"laatste_wijziging":null,"sluit":"2026-11-10T19:18:20Z","open":true},{"soort":"kavel","kavel":112,"categorie":"Transport & overig","titel":"Oprijdplaten (2 stuks)","link":"https://auctivo.net/nl/auction/b10e4c75-ae8c-4562-8f48-b853ec689a24/lot/7474ceda-cb59-435f-96f1-452a82482280","minimum":10,"hoogste_bod":30,"biedingen":5,"bod_erbij":0,"biedingen_erbij":0,"laatste_wijziging":null,"sluit":"2026-11-10T19:19:10Z","open":true},{"soort":"kavel","kavel":113,"categorie":"Werkplaats & gereedschap","titel":"Bosch / Einhell acculaders met accu's (3 stuks)","link":"https://auctivo.net/nl/auction/b10e4c75-ae8c-4562-8f48-b853ec689a24/lot/936b9135-12ce-4a18-8536-be3a4963c6c8","minimum":10,"hoogste_bod":12,"biedingen":2,"bod_erbij":0,"biedingen_erbij":0,"laatste_wijziging":null,"sluit":"2026-11-10T19:20:00Z","open":true},{"soort":"kavel","kavel":114,"categorie":"Werkplaats & gereedschap","titel":"STANLEY gereedschapswagen + OK gereedschapskoffer","link":"https://auctivo.net/nl/auction/b10e4c75-ae8c-4562-8f48-b853ec689a24/lot/4ddedacf-dc9d-4eed-bb87-93aebad524a3","minimum":10,"hoogste_bod":18,"biedingen":3,"bod_erbij":0,"biedingen_erbij":0,"laatste_wijziging":null,"sluit":"2026-11-10T19:20:50Z","open":true},{"soort":"kavel","kavel":115,"categorie":"Magazijn & stellingen","titel":"Inhoud stelling: diverse magazijnbakken met onderdelen","link":"https://auctivo.net/nl/auction/b10e4c75-ae8c-4562-8f48-b853ec689a24/lot/6e0cb8f5-3bb2-4413-a0ad-90d2098d18eb","minimum":10,"hoogste_bod":18,"biedingen":4,"bod_erbij":0,"biedingen_erbij":0,"laatste_wijziging":null,"sluit":"2026-11-10T19:21:40Z","open":true},{"soort":"kavel","kavel":116,"categorie":"Magazijn & stellingen","titel":"Inhoud stelling: diverse onderdelen in rode magazijnbakken","link":"https://auctivo.net/nl/auction/b10e4c75-ae8c-4562-8f48-b853ec689a24/lot/7cf710e2-6492-47af-8398-5e9208a0ba98","minimum":10,"hoogste_bod":22,"biedingen":4,"bod_erbij":0,"biedingen_erbij":0,"laatste_wijziging":null,"sluit":"2026-11-10T19:22:30Z","open":true},{"soort":"kavel","kavel":117,"categorie":"Magazijn & stellingen","titel":"Inhoud stelling: rode magazijnbakken met onderdelen","link":"https://auctivo.net/nl/auction/b10e4c75-ae8c-4562-8f48-b853ec689a24/lot/b69ebd3f-620e-430d-8e56-d17508bab8ab","minimum":10,"hoogste_bod":20,"biedingen":4,"bod_erbij":0,"biedingen_erbij":0,"laatste_wijziging":null,"sluit":"2026-11-10T19:23:20Z","open":true},{"soort":"kavel","kavel":118,"categorie":"Magazijn & stellingen","titel":"Inhoud stelling, magazijnbakken en diverse onderdelen","link":"https://auctivo.net/nl/auction/b10e4c75-ae8c-4562-8f48-b853ec689a24/lot/7c739610-aae5-46a9-a266-e4fc14122ee6","minimum":10,"hoogste_bod":20,"biedingen":4,"bod_erbij":0,"biedingen_erbij":0,"laatste_wijziging":null,"sluit":"2026-11-10T19:24:10Z","open":true},{"soort":"kavel","kavel":119,"categorie":"Onderdelen & accessoires","titel":"Inhoud stelling: diverse fietsonderdelen","link":"https://auctivo.net/nl/auction/b10e4c75-ae8c-4562-8f48-b853ec689a24/lot/0672d0df-001e-4728-afc6-c98bd46a01de","minimum":10,"hoogste_bod":45,"biedingen":6,"bod_erbij":0,"biedingen_erbij":0,"laatste_wijziging":null,"sluit":"2026-11-10T19:25:00Z","open":true},{"soort":"kavel","kavel":120,"categorie":"Magazijn & stellingen","titel":"Inhoud stelling: diverse onderdelen in magazijnbakken","link":"https://auctivo.net/nl/auction/b10e4c75-ae8c-4562-8f48-b853ec689a24/lot/2a7a2891-1c69-4dd7-8008-e375ee1cc2f3","minimum":10,"hoogste_bod":20,"biedingen":4,"bod_erbij":0,"biedingen_erbij":0,"laatste_wijziging":null,"sluit":"2026-11-10T19:25:50Z","open":true},{"soort":"kavel","kavel":121,"categorie":"Magazijn & stellingen","titel":"Stellingen (6 stuks)","link":"https://auctivo.net/nl/auction/b10e4c75-ae8c-4562-8f48-b853ec689a24/lot/fc5fb551-dbba-48d8-8ecf-9df3b3c0ffb4","minimum":10,"hoogste_bod":14,"biedingen":3,"bod_erbij":0,"biedingen_erbij":0,"laatste_wijziging":null,"sluit":"2026-11-10T19:26:40Z","open":true},{"soort":"kavel","kavel":122,"categorie":"Werkplaats & gereedschap","titel":"Einhell, AXXIO 18/125, accu-haakse slijper","link":"https://auctivo.net/nl/auction/b10e4c75-ae8c-4562-8f48-b853ec689a24/lot/5e9069a7-5a64-4352-8354-1094cf097d8f","minimum":10,"hoogste_bod":27,"biedingen":8,"bod_erbij":0,"biedingen_erbij":0,"laatste_wijziging":null,"sluit":"2026-11-10T19:27:30Z","open":true},{"soort":"kavel","kavel":123,"categorie":"Kantoor & inrichting","titel":"EASY FIETS winkeldecoratie (divers)","link":"https://auctivo.net/nl/auction/b10e4c75-ae8c-4562-8f48-b853ec689a24/lot/76d2d3e7-8f61-48a6-be81-c5a538d24dbe","minimum":1,"hoogste_bod":3,"biedingen":2,"bod_erbij":0,"biedingen_erbij":0,"laatste_wijziging":null,"sluit":"2026-11-10T19:28:20Z","open":true},{"soort":"kavel","kavel":124,"categorie":"Kantoor & inrichting","titel":"Bureaustoelen (2 stuks)","link":"https://auctivo.net/nl/auction/b10e4c75-ae8c-4562-8f48-b853ec689a24/lot/335332fe-ffe9-4dad-b42b-94393487d519","minimum":5,"hoogste_bod":13,"biedingen":3,"bod_erbij":0,"biedingen_erbij":0,"laatste_wijziging":null,"sluit":"2026-11-10T19:29:10Z","open":true},{"soort":"kavel","kavel":125,"categorie":"Kantoor & inrichting","titel":"Kantoorinrichting met 5 schermen, 2 bureaus en 3 stoelen","link":"https://auctivo.net/nl/auction/b10e4c75-ae8c-4562-8f48-b853ec689a24/lot/6536b255-f6f0-4990-b199-02a287f6f451","minimum":10,"hoogste_bod":16,"biedingen":2,"bod_erbij":0,"biedingen_erbij":0,"laatste_wijziging":null,"sluit":"2026-11-10T19:30:00Z","open":true},{"soort":"kavel","kavel":126,"categorie":"Kantoor & inrichting","titel":"Inhoud keuken (diverse apparaten en toebehoren)","link":"https://auctivo.net/nl/auction/b10e4c75-ae8c-4562-8f48-b853ec689a24/lot/424073be-3179-481b-a951-0c6273c93fca","minimum":5,"hoogste_bod":5,"biedingen":1,"bod_erbij":0,"biedingen_erbij":0,"laatste_wijziging":null,"sluit":"2026-11-10T19:30:50Z","open":true},{"soort":"kavel","kavel":127,"categorie":"Transport & overig","titel":"BHV koffer Oranje Kruis + Salvequick pleisterdispenser","link":"https://auctivo.net/nl/auction/b10e4c75-ae8c-4562-8f48-b853ec689a24/lot/41b3a719-df6f-4fcf-a64d-6949d68db77d","minimum":1,"hoogste_bod":3,"biedingen":2,"bod_erbij":0,"biedingen_erbij":0,"laatste_wijziging":null,"sluit":"2026-11-10T19:31:40Z","open":true},{"soort":"kavel","kavel":128,"categorie":"Transport & overig","titel":"Zwart ommantelde kabels met lussen (8 stuks)","link":"https://auctivo.net/nl/auction/b10e4c75-ae8c-4562-8f48-b853ec689a24/lot/3984bd64-2f18-419c-a81e-43165318e68f","minimum":5,"hoogste_bod":5,"biedingen":1,"bod_erbij":0,"biedingen_erbij":0,"laatste_wijziging":null,"sluit":"2026-11-10T19:32:30Z","open":true},{"soort":"kavel","kavel":129,"categorie":"Onderdelen & accessoires","titel":"Partij fietsbanden","link":"https://auctivo.net/nl/auction/b10e4c75-ae8c-4562-8f48-b853ec689a24/lot/a074ccae-87ad-43be-a007-404fe4080c73","minimum":1,"hoogste_bod":3,"biedingen":1,"bod_erbij":0,"biedingen_erbij":0,"laatste_wijziging":null,"sluit":"2026-11-10T19:33:20Z","open":true},{"soort":"kavel","kavel":130,"categorie":"Transport & overig","titel":"ROSELAND, RS-500, party speaker","link":"https://auctivo.net/nl/auction/b10e4c75-ae8c-4562-8f48-b853ec689a24/lot/57ee3edb-2488-4757-9e7f-1be789ee6e35","minimum":1,"hoogste_bod":17,"biedingen":6,"bod_erbij":0,"biedingen_erbij":0,"laatste_wijziging":null,"sluit":"2026-11-10T19:34:10Z","open":true},{"soort":"kavel","kavel":131,"categorie":"Transport & overig","titel":"Eduard plateauwagen P3 met gaasopzetborden","link":"https://auctivo.net/nl/auction/b10e4c75-ae8c-4562-8f48-b853ec689a24/lot/782b1b30-da25-480c-8540-f88de7c6bc2e","minimum":350,"hoogste_bod":795,"biedingen":21,"bod_erbij":0,"biedingen_erbij":0,"laatste_wijziging":null,"sluit":"2026-11-10T19:35:00Z","open":true},{"soort":"meting","moment":"2026-11-02T07:32:56.708Z","totaal_bod":4461,"totaal_biedingen":508,"kavels_met_bod":100,"kavels_open":115},{"soort":"meting_categorie","moment":"2026-11-02T07:32:56.708Z","categorie":"Fietsen","totaal_bod":1601,"totaal_biedingen":212,"kavels_met_bod":41,"kavels":42},{"soort":"meting_categorie","moment":"2026-11-02T07:32:56.708Z","categorie":"E-bikes","totaal_bod":365,"totaal_biedingen":21,"kavels_met_bod":9,"kavels":18},{"soort":"meting_categorie","moment":"2026-11-02T07:32:56.708Z","categorie":"Onderdelen & accessoires","totaal_bod":303,"totaal_biedingen":53,"kavels_met_bod":9,"kavels":12},{"soort":"meting_categorie","moment":"2026-11-02T07:32:56.708Z","categorie":"Kantoor & inrichting","totaal_bod":121,"totaal_biedingen":29,"kavels_met_bod":9,"kavels":10},{"soort":"meting_categorie","moment":"2026-11-02T07:32:56.708Z","categorie":"Werkplaats & gereedschap","totaal_bod":1065,"totaal_biedingen":131,"kavels_met_bod":19,"kavels":19},{"soort":"meting_categorie","moment":"2026-11-02T07:32:56.708Z","categorie":"Transport & overig","totaal_bod":880,"totaal_biedingen":37,"kavels_met_bod":6,"kavels":6},{"soort":"meting_categorie","moment":"2026-11-02T07:32:56.708Z","categorie":"Magazijn & stellingen","totaal_bod":126,"totaal_biedingen":25,"kavels_met_bod":7,"kavels":8},{"soort":"meting","moment":"2026-11-02T08:08:16.779Z","totaal_bod":4461,"totaal_biedingen":508,"kavels_met_bod":100,"kavels_open":115},{"soort":"meting_categorie","moment":"2026-11-02T08:08:16.779Z","categorie":"Fietsen","totaal_bod":1601,"totaal_biedingen":212,"kavels_met_bod":41,"kavels":42},{"soort":"meting_categorie","moment":"2026-11-02T08:08:16.779Z","categorie":"E-bikes","totaal_bod":365,"totaal_biedingen":21,"kavels_met_bod":9,"kavels":18},{"soort":"meting_categorie","moment":"2026-11-02T08:08:16.779Z","categorie":"Onderdelen & accessoires","totaal_bod":303,"totaal_biedingen":53,"kavels_met_bod":9,"kavels":12},{"soort":"meting_categorie","moment":"2026-11-02T08:08:16.779Z","categorie":"Kantoor & inrichting","totaal_bod":121,"totaal_biedingen":29,"kavels_met_bod":9,"kavels":10},{"soort":"meting_categorie","moment":"2026-11-02T08:08:16.779Z","categorie":"Werkplaats & gereedschap","totaal_bod":1065,"totaal_biedingen":131,"kavels_met_bod":19,"kavels":19},{"soort":"meting_categorie","moment":"2026-11-02T08:08:16.779Z","categorie":"Transport & overig","totaal_bod":880,"totaal_biedingen":37,"kavels_met_bod":6,"kavels":6},{"soort":"meting_categorie","moment":"2026-11-02T08:08:16.779Z","categorie":"Magazijn & stellingen","totaal_bod":126,"totaal_biedingen":25,"kavels_met_bod":7,"kavels":8}]};
+const TZ = 'Europe/Amsterdam';
+const PALETTE = ['#2f7ed8', '#e07a2e', '#2a9d6e', '#c4428a', '#7a5bd6', '#c49a16', '#2f9fb5', '#8a8f86'];
+const eur = (v) => (v == null ? '–' : '€ ' + Number(v).toLocaleString('nl-NL', { minimumFractionDigits: v % 1 ? 2 : 0, maximumFractionDigits: 2 }));
+const int = (v) => Number(v).toLocaleString('nl-NL');
+const when = (iso) => (iso ? new Date(iso).toLocaleString('nl-NL', { timeZone: TZ, weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : '');
+const short = (d) => d.toLocaleString('nl-NL', { timeZone: TZ, day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+const $ = (id) => document.getElementById(id);
+
+const lots = D.rows.filter((r) => r.soort === 'kavel');
+const hist = D.rows.filter((r) => r.soort === 'wijziging').sort((a, b) => (a.moment < b.moment ? 1 : a.moment > b.moment ? -1 : a.kavel - b.kavel));
+const metCat = D.rows.filter((r) => r.soort === 'meting_categorie').sort((a, b) => (a.moment < b.moment ? -1 : 1));
+const metingen = D.rows.filter((r) => r.soort === 'meting').sort((a, b) => (a.moment < b.moment ? -1 : 1));
+const first = new Map();
+for (const r of lots) if (!first.has(r.categorie) || r.kavel < first.get(r.categorie)) first.set(r.categorie, r.kavel);
+const CATS = [...first.keys()].sort((a, b) => first.get(a) - first.get(b));
+const color = (c) => PALETTE[CATS.indexOf(c) % PALETTE.length];
+
+const DEFAULTS = { cats: [], status: 'alle', bod: false, trend: 'bod', split: 'totaal', catMaat: 'bod', top: 'bod', topN: 10 };
+let S = { ...DEFAULTS };
+try { S = { ...DEFAULTS, ...JSON.parse(localStorage.getItem('veiling-filters') || '{}') }; } catch (e) { /* storage unavailable */ }
+let sortKey = 'kavel', sortDir = 1, picked = null;
+const save = () => { try { localStorage.setItem('veiling-filters', JSON.stringify(S)); } catch (e) { /* ignore */ } };
+const set = (patch) => { S = { ...S, ...patch }; save(); render(); };
+const catOn = (c) => !S.cats.length || S.cats.includes(c);
+const filtered = () => lots.filter((r) => catOn(r.categorie) && (S.status === 'alle' || (S.status === 'open' ? r.open : !r.open)) && (!S.bod || r.biedingen > 0));
+
+function tipFor(el) {
+  let t = el.querySelector(':scope > .tip');
+  if (!t) { t = document.createElement('div'); t.className = 'tip'; t.hidden = true; el.append(t); }
+  return {
+    show(x, y, head, rows) {
+      t.replaceChildren();
+      const h = document.createElement('div'); h.className = 'h'; h.textContent = head; t.append(h);
+      for (const r of rows) { const d = document.createElement('div'); d.className = 'r'; if (r.color) { const i = document.createElement('i'); i.className = 'dot'; i.style.background = r.color; d.append(i); } d.append(r.text); t.append(d); }
+      t.hidden = false;
+      t.style.left = Math.min(Math.max(0, x + 12), el.clientWidth - t.offsetWidth) + 'px';
+      t.style.top = Math.max(0, y - t.offsetHeight - 8) + 'px';
+    },
+    hide() { t.hidden = true; },
+  };
+}
+function measure(svg, texts) {
+  const p = svg.append('text').attr('font-size', 12); let w = 0;
+  for (const s of texts) { p.text(s); w = Math.max(w, p.node().getComputedTextLength()); }
+  p.remove(); return w;
+}
+function empty(el, text) { const p = document.createElement('p'); p.className = 'empty'; p.textContent = text; el.append(p); }
+function xLabels(sel, x, left, w) {
+  let lastRight = -Infinity;
+  sel.each(function () {
+    const half = this.getComputedTextLength() / 2;
+    const cx = Math.min(Math.max(Number(this.getAttribute('x')), left + half), w - 2 - half);
+    if (cx - half < lastRight + 10) { this.remove(); return; }
+    this.setAttribute('x', cx); lastRight = cx + half;
+  });
+}
+function hbar(el, items, fmt, onPick, tipRows) {
+  const w = Math.max(260, el.clientWidth), rowH = 28, h = 8 + items.length * rowH;
+  const svg = d3.select(el).append('svg').attr('width', '100%').attr('viewBox', `0 0 ${w} ${h}`);
+  const labelW = Math.min(measure(svg, items.map((d) => d.label)) + 10, w * 0.45);
+  const valW = measure(svg, items.map((d) => fmt(d.value))) + 10;
+  const x = d3.scaleLinear([0, d3.max(items, (d) => d.value) || 1], [labelW, w - valW]);
+  const g = svg.selectAll('g').data(items).join('g').attr('class', 'hit').attr('transform', (d, i) => `translate(0,${4 + i * rowH})`);
+  g.append('text').attr('x', labelW - 8).attr('y', rowH / 2).attr('dy', '0.32em').attr('text-anchor', 'end').attr('font-size', 12).attr('fill', 'currentColor').text((d) => d.label)
+    .each(function (d) { let s = d.label; while (this.getComputedTextLength() > labelW - 12 && s.length > 4) { s = s.slice(0, -2); this.textContent = s + '…'; } });
+  g.append('rect').attr('class', 'grow').attr('x', labelW).attr('y', 6).attr('height', rowH - 12).attr('rx', 3).attr('width', (d) => Math.max(2, x(d.value) - labelW)).attr('fill', (d) => d.color);
+  g.append('text').attr('x', (d) => Math.max(labelW + 2, x(d.value)) + 6).attr('y', rowH / 2).attr('dy', '0.32em').attr('font-size', 12).attr('fill', 'var(--muted)').text((d) => fmt(d.value));
+  g.append('rect').attr('width', w).attr('height', rowH).attr('fill', 'transparent');
+  const tip = tipFor(el);
+  g.on('pointermove', (e, d) => { const [px, py] = d3.pointer(e, el); tip.show(px, py, d.label, tipRows(d)); }).on('pointerleave', () => tip.hide()).on('click', (e, d) => onPick(d));
+}
+
+function drawTrend() {
+  const el = $('ch-trend'); el.replaceChildren();
+  const field = { bod: 'totaal_bod', biedingen: 'totaal_biedingen', metbod: 'kavels_met_bod' }[S.trend];
+  const fmt = S.trend === 'bod' ? eur : int;
+  const rows = metCat.filter((r) => catOn(r.categorie));
+  const moments = [...new Set(rows.map((r) => r.moment))];
+  if (!moments.length) { empty(el, 'Geen metingen voor deze selectie.'); return; }
+  const series = S.split === 'categorie'
+    ? CATS.filter(catOn).map((c) => ({ name: c, color: color(c), pts: rows.filter((r) => r.categorie === c).map((r) => ({ t: new Date(r.moment), v: Number(r[field]) })) }))
+    : [{ name: 'Selectie', color: 'var(--accent)', pts: moments.map((m) => ({ t: new Date(m), v: d3.sum(rows.filter((r) => r.moment === m), (r) => Number(r[field])) })) }];
+  const w = Math.max(280, el.clientWidth), h = 300;
+  const svg = d3.select(el).append('svg').attr('width', '100%').attr('viewBox', `0 0 ${w} ${h}`);
+  const y = d3.scaleLinear([0, (d3.max(series, (s) => d3.max(s.pts, (q) => q.v)) || 1) * 1.08], [h - 26, 10]).nice();
+  const yT = y.ticks(5), left = measure(svg, yT.map(fmt)) + 12;
+  const t0 = new Date(moments[0]), t1 = new Date(moments[moments.length - 1]);
+  const x = d3.scaleUtc(+t0 < +t1 ? [t0, t1] : [d3.utcHour.offset(t0, -2), d3.utcHour.offset(t0, 2)], [left, w - 14]);
+  svg.append('g').selectAll('line').data(yT).join('line').attr('x1', left).attr('x2', w - 14).attr('y1', y).attr('y2', y).attr('stroke', 'var(--grid)');
+  svg.append('g').selectAll('text').data(yT).join('text').attr('x', left - 8).attr('y', y).attr('dy', '0.32em').attr('text-anchor', 'end').attr('font-size', 12).attr('fill', 'var(--muted)').text(fmt);
+  xLabels(svg.append('g').selectAll('text').data(x.ticks(Math.max(2, Math.floor((w - left) / 120)))).join('text').attr('x', x).attr('y', h - 6).attr('text-anchor', 'middle').attr('font-size', 12).attr('fill', 'var(--muted)').text(short), x, left, w);
+  if (series.length === 1) {
+    const grad = svg.append('defs').append('linearGradient').attr('id', 'fade').attr('x2', 0).attr('y2', 1);
+    [[0, .26], [.25, .16], [.5, .08], [.75, .03], [1, 0]].forEach(([o, a]) => grad.append('stop').attr('offset', o).attr('style', `stop-color:var(--accent);stop-opacity:${a}`));
+    svg.append('path').datum(series[0].pts).attr('fill', 'url(#fade)').attr('d', d3.area((q) => x(q.t), y(0), (q) => y(q.v)));
+  }
+  for (const s of series) {
+    svg.append('path').datum(s.pts).attr('fill', 'none').attr('stroke', s.color).attr('stroke-width', 2).attr('stroke-linecap', 'round').attr('stroke-linejoin', 'round').attr('d', d3.line((q) => x(q.t), (q) => y(q.v)));
+    const l = s.pts[s.pts.length - 1]; if (l) svg.append('circle').attr('cx', x(l.t)).attr('cy', y(l.v)).attr('r', 3.5).attr('fill', s.color);
+  }
+  const rule = svg.append('line').attr('y1', 10).attr('y2', h - 26).attr('stroke', 'var(--axis)').style('display', 'none');
+  const tip = tipFor(el);
+  svg.append('rect').attr('x', left).attr('width', w - 14 - left).attr('height', h - 26).attr('fill', 'transparent')
+    .on('pointermove', (e) => {
+      const [px] = d3.pointer(e); const m = moments[d3.leastIndex(moments, (mm) => Math.abs(x(new Date(mm)) - px))]; const tx = x(new Date(m));
+      rule.style('display', null).attr('x1', tx).attr('x2', tx);
+      const at = series.map((s) => ({ s, q: s.pts.find((q) => +q.t === +new Date(m)) })).filter((r) => r.q).sort((a, b) => b.q.v - a.q.v);
+      const [, py] = d3.pointer(e, el);
+      tip.show(tx * (el.clientWidth / w), py, when(m), at.map((r) => ({ color: series.length > 1 ? r.s.color : null, text: (series.length > 1 ? r.s.name + ': ' : '') + fmt(r.q.v) })));
+    })
+    .on('pointerleave', () => { rule.style('display', 'none'); tip.hide(); });
+}
+function drawCat() {
+  const el = $('ch-cat'); el.replaceChildren();
+  const base = lots.filter((r) => (S.status === 'alle' || (S.status === 'open' ? r.open : !r.open)) && (!S.bod || r.biedingen > 0));
+  const fmt = S.catMaat === 'aandeel' ? (v) => Math.round(v * 100) + '%' : S.catMaat === 'biedingen' ? int : (v) => eur(Math.round(v));
+  const items = CATS.map((c) => {
+    const rs = base.filter((r) => r.categorie === c), met = rs.filter((r) => r.biedingen > 0), som = d3.sum(rs, (r) => r.hoogste_bod), bied = d3.sum(rs, (r) => r.biedingen);
+    const value = S.catMaat === 'bod' ? som : S.catMaat === 'biedingen' ? bied : S.catMaat === 'gem' ? (met.length ? som / met.length : 0) : (rs.length ? met.length / rs.length : 0);
+    return { key: c, label: c, value, color: catOn(c) ? color(c) : 'var(--axis)', n: rs.length, met: met.length, som, bied };
+  }).sort((a, b) => b.value - a.value);
+  hbar(el, items, fmt, (it) => set({ cats: S.cats.length === 1 && S.cats[0] === it.key ? [] : [it.key] }),
+    (it) => [{ text: `${eur(it.som)} · ${int(it.bied)} biedingen` }, { text: `${it.met} van ${it.n} kavels met een bod` }]);
+}
+function drawTop() {
+  const el = $('ch-top'); el.replaceChildren();
+  const val = { bod: (r) => r.hoogste_bod, biedingen: (r) => r.biedingen, factor: (r) => (r.biedingen && r.minimum ? r.hoogste_bod / r.minimum : 0), erbij: (r) => r.biedingen_erbij }[S.top];
+  const fmt = S.top === 'bod' ? eur : S.top === 'factor' ? (v) => v.toLocaleString('nl-NL', { maximumFractionDigits: 1 }) + '×' : int;
+  const items = filtered().filter((r) => val(r) > 0).sort((a, b) => val(b) - val(a)).slice(0, S.topN).map((r) => ({ key: r.kavel, label: `${r.kavel} · ${r.titel}`, value: val(r), color: color(r.categorie), r }));
+  if (!items.length) { empty(el, S.top === 'erbij' ? 'Geen nieuwe biedingen sinds de vorige meting in deze selectie.' : 'Geen kavels met een bod in deze selectie.'); return; }
+  hbar(el, items, fmt, (it) => pick(it.key), (it) => [{ color: it.color, text: it.r.categorie }, { text: `${eur(it.r.hoogste_bod)} · ${it.r.biedingen} biedingen · minimum ${eur(it.r.minimum)}` }]);
+}
+function drawAct() {
+  const el = $('ch-act'); el.replaceChildren();
+  const rows = metCat.filter((r) => catOn(r.categorie));
+  const moments = [...new Set(rows.map((r) => r.moment))];
+  const tot = moments.map((m) => d3.sum(rows.filter((r) => r.moment === m), (r) => r.totaal_biedingen));
+  const bars = moments.slice(1).map((m, i) => ({ m, v: Math.max(0, tot[i + 1] - tot[i]) }));
+  if (!bars.length) { empty(el, 'Na de tweede meting verschijnt hier hoeveel biedingen er per meting bij kwamen.'); return; }
+  const w = Math.max(280, el.clientWidth), h = 220;
+  const svg = d3.select(el).append('svg').attr('width', '100%').attr('viewBox', `0 0 ${w} ${h}`);
+  const y = d3.scaleLinear([0, d3.max(bars, (b) => b.v) || 1], [h - 26, 10]).nice();
+  const yT = y.ticks(4).filter(Number.isInteger), left = measure(svg, yT.map(int)) + 12;
+  const x = d3.scaleBand(bars.map((b) => b.m), [left, w - 8]).padding(0.2), bw = Math.min(32, x.bandwidth());
+  svg.append('g').selectAll('line').data(yT).join('line').attr('x1', left).attr('x2', w - 8).attr('y1', y).attr('y2', y).attr('stroke', 'var(--grid)');
+  svg.append('g').selectAll('text').data(yT).join('text').attr('x', left - 8).attr('y', y).attr('dy', '0.32em').attr('text-anchor', 'end').attr('font-size', 12).attr('fill', 'var(--muted)').text(int);
+  const tip = tipFor(el);
+  svg.append('g').selectAll('rect').data(bars).join('rect').attr('x', (b) => x(b.m) + (x.bandwidth() - bw) / 2).attr('width', bw).attr('y', (b) => y(b.v)).attr('height', (b) => Math.max(0, y(0) - y(b.v))).attr('rx', 3).attr('fill', 'var(--accent)')
+    .on('pointermove', (e, b) => { const [px, py] = d3.pointer(e, el); tip.show(px, py, when(b.m), [{ text: `${int(b.v)} nieuwe biedingen` }]); }).on('pointerleave', () => tip.hide());
+  const every = Math.ceil(bars.length / Math.max(2, Math.floor((w - left) / 110)));
+  xLabels(svg.append('g').selectAll('text').data(bars.filter((b, i) => i % every === 0)).join('text').attr('x', (b) => x(b.m) + x.bandwidth() / 2).attr('y', h - 6).attr('text-anchor', 'middle').attr('font-size', 12).attr('fill', 'var(--muted)').text((b) => short(new Date(b.m))), x, left, w);
+}
+
+function td(tr, text, cls) { const c = tr.insertCell(); c.textContent = text; if (cls) c.className = cls; return c; }
+function drawLots() {
+  const tb = $('tb-lots'); tb.replaceChildren();
+  const q = $('q').value.trim().toLowerCase(), onlyChanged = $('f-changed').checked, maxBid = d3.max(lots, (r) => r.hoogste_bod) || 1;
+  const rows = filtered().filter((r) => (!q || String(r.kavel).includes(q) || r.titel.toLowerCase().includes(q)) && (!onlyChanged || r.bod_erbij || r.biedingen_erbij))
+    .sort((a, b) => { const x = a[sortKey] ?? '', y = b[sortKey] ?? ''; return (x > y ? 1 : x < y ? -1 : 0) * sortDir; });
+  for (const r of rows) {
+    const tr = tb.insertRow(); tr.dataset.k = r.kavel; if (picked === r.kavel) tr.className = 'picked';
+    td(tr, String(r.kavel));
+    const t = tr.insertCell(); t.className = 't'; const a = document.createElement('a'); a.href = r.link; a.target = '_blank'; a.rel = 'noopener'; a.textContent = r.titel; t.append(a);
+    const c = tr.insertCell(); c.className = 'narrow-hide'; const s = document.createElement('span'); s.className = 'cat'; const i = document.createElement('i'); i.className = 'dot'; i.style.background = color(r.categorie); s.append(i, r.categorie); c.append(s);
+    td(tr, eur(r.minimum), 'r narrow-hide');
+    const b = tr.insertCell(); b.className = 'r';
+    if (r.biedingen) { const bar = document.createElement('span'); bar.className = 'bar'; bar.style.width = Math.max(2, (r.hoogste_bod / maxBid) * 60) + 'px'; bar.style.background = color(r.categorie); b.append(bar, eur(r.hoogste_bod)); } else b.textContent = '–';
+    td(tr, String(r.biedingen), 'r');
+    td(tr, r.bod_erbij ? '+' + eur(r.bod_erbij) : '', 'r' + (r.bod_erbij ? ' up' : ''));
+    td(tr, when(r.laatste_wijziging), 'narrow-hide');
+    td(tr, when(r.sluit) + (r.open ? '' : ' · gesloten'), 'narrow-hide' + (r.open ? '' : ' closed'));
+  }
+}
+function drawHist() {
+  const tb = $('tb-hist'); tb.replaceChildren();
+  const rows = hist.filter((r) => (picked != null ? r.kavel === picked : catOn(r.categorie)));
+  for (const r of rows) {
+    const tr = tb.insertRow();
+    td(tr, when(r.moment)); td(tr, String(r.kavel)); td(tr, r.titel, 'narrow-hide'); td(tr, eur(r.bod_voor), 'r'); td(tr, eur(r.bod_na), 'r');
+    td(tr, r.biedingen_voor == null ? '–' : String(r.biedingen_voor), 'r narrow-hide'); td(tr, String(r.biedingen_na), 'r'); td(tr, r.opmerking, 'narrow-hide');
+  }
+  $('no-hist').hidden = rows.length > 0;
+  $('all').hidden = picked == null;
+}
+function pick(n) { picked = picked === n ? null : n; drawLots(); drawHist(); if (picked != null) $('geschiedenis').scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+
+function drawHeader() {
+  const last = metingen[metingen.length - 1];
+  $('moment').textContent = last ? when(last.moment) : '–';
+  $('changed').textContent = String(lots.filter((r) => r.bod_erbij || r.biedingen_erbij).length);
+  $('auction').href = D.auctionUrl;
+  $('generated').textContent = when(D.generated);
+  const open = lots.filter((r) => r.open).map((r) => Date.parse(r.sluit));
+  const ms = open.length ? Math.min(...open) - Date.now() : -1;
+  const dd = Math.floor(ms / 864e5), hh = Math.floor((ms % 864e5) / 36e5), mm = Math.floor((ms % 36e5) / 6e4);
+  $('countdown').textContent = !open.length ? 'Gesloten' : ms <= 0 ? 'Nu bezig' : dd ? `${dd} d ${hh} u` : `${hh} u ${mm} min`;
+}
+function drawChips() {
+  const el = $('chips'); el.replaceChildren();
+  const mk = (label, count, c, pressed, fn) => {
+    const b = document.createElement('button'); b.type = 'button'; b.className = 'chip'; b.setAttribute('aria-pressed', String(pressed));
+    if (c) { const i = document.createElement('i'); i.style.background = c; b.append(i); }
+    const s = document.createElement('small'); s.textContent = count; b.append(label, s); b.addEventListener('click', fn); el.append(b);
+  };
+  mk('Alle categorieën', lots.length, null, !S.cats.length, () => set({ cats: [] }));
+  for (const c of CATS) mk(c, lots.filter((r) => r.categorie === c).length, color(c), S.cats.includes(c), () => {
+    const next = S.cats.includes(c) ? S.cats.filter((x) => x !== c) : [...S.cats, c];
+    set({ cats: next.length === CATS.length ? [] : next });
+  });
+  const n = filtered().length;
+  $('f-text').textContent = n === lots.length ? `Alle ${n} kavels` : `${n} van ${lots.length} kavels geselecteerd`;
+}
+function drawTiles() {
+  const rows = filtered(), met = rows.filter((r) => r.biedingen > 0), som = d3.sum(rows, (r) => r.hoogste_bod), top = d3.greatest(rows, (r) => r.hoogste_bod);
+  const bodErbij = d3.sum(rows, (r) => r.bod_erbij), biedErbij = d3.sum(rows, (r) => r.biedingen_erbij), minimum = d3.sum(met, (r) => r.minimum);
+  $('t-som').textContent = eur(som); $('s-som').textContent = bodErbij ? `+${eur(bodErbij)} sinds vorige meting` : 'Geen verandering sinds vorige meting'; $('s-som').classList.toggle('up', bodErbij > 0);
+  $('t-bied').textContent = int(d3.sum(rows, (r) => r.biedingen)); $('s-bied').textContent = biedErbij ? `+${int(biedErbij)} sinds vorige meting` : 'Geen nieuwe sinds vorige meting'; $('s-bied').classList.toggle('up', biedErbij > 0);
+  $('t-met').textContent = `${met.length} / ${rows.length}`; $('s-met').textContent = rows.length ? `${Math.round((met.length / rows.length) * 100)}% van de selectie` : '';
+  $('t-gem').textContent = met.length ? eur(Math.round(som / met.length)) : '–'; $('s-gem').textContent = minimum ? `${(som / minimum).toLocaleString('nl-NL', { maximumFractionDigits: 1 })}× het minimumbod` : '';
+  $('t-top').textContent = top && top.biedingen ? eur(top.hoogste_bod) : '–'; $('s-top').textContent = top && top.biedingen ? `Kavel ${top.kavel}: ${top.titel}` : '';
+}
+function syncControls() {
+  $('f-status').value = S.status; $('f-bod').checked = S.bod; $('c-trend').value = S.trend; $('c-split').value = S.split;
+  $('c-cat').value = S.catMaat; $('c-top').value = S.top; $('c-topn').value = String(S.topN);
+}
+function render() { syncControls(); drawHeader(); drawChips(); drawTiles(); drawTrend(); drawCat(); drawTop(); drawAct(); drawLots(); drawHist(); }
+
+$('f-status').addEventListener('change', (e) => set({ status: e.target.value }));
+$('f-bod').addEventListener('change', (e) => set({ bod: e.target.checked }));
+$('f-reset').addEventListener('click', () => { S = { ...DEFAULTS }; picked = null; save(); render(); });
+$('c-trend').addEventListener('change', (e) => set({ trend: e.target.value }));
+$('c-split').addEventListener('change', (e) => set({ split: e.target.value }));
+$('c-cat').addEventListener('change', (e) => set({ catMaat: e.target.value }));
+$('c-top').addEventListener('change', (e) => set({ top: e.target.value }));
+$('c-topn').addEventListener('change', (e) => set({ topN: Number(e.target.value) }));
+$('q').addEventListener('input', drawLots);
+$('f-changed').addEventListener('change', drawLots);
+$('all').addEventListener('click', () => pick(picked));
+document.querySelector('.lots thead').addEventListener('click', (e) => {
+  const th = e.target.closest('th[data-k]'); if (!th) return;
+  const k = th.dataset.k; sortDir = sortKey === k ? -sortDir : (['kavel', 'titel', 'categorie', 'sluit'].includes(k) ? 1 : -1); sortKey = k;
+  document.querySelectorAll('.lots th').forEach((h) => h.setAttribute('aria-sort', h === th ? (sortDir === 1 ? 'ascending' : 'descending') : 'none'));
+  drawLots();
+});
+$('tb-lots').addEventListener('click', (e) => { if (e.target.closest('a')) return; const tr = e.target.closest('tr[data-k]'); if (tr) pick(Number(tr.dataset.k)); });
+let rt; window.addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(() => { drawTrend(); drawCat(); drawTop(); drawAct(); }, 150); });
+render();
+</script>
+</body>
+</html>

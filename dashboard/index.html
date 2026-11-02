@@ -1,0 +1,683 @@
+<meta name="dash-one-writer">
+<style>
+  .vx { display: flex; flex-direction: column; gap: var(--cds-gap-lg); font-family: var(--font-anthropic-sans); }
+  .vx-hero { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: var(--cds-gap-md); padding-bottom: var(--cds-gap-sm); border-bottom: 1px solid var(--color-border-line); }
+  .vx-hero-text { min-width: 0; flex: 1 1 26rem; }
+  .vx-eyebrow { font-size: var(--cds-font-size-caption); letter-spacing: .06em; text-transform: uppercase; color: var(--color-fg-muted); margin: 0 0 var(--cds-gap-xs); }
+  .vx-hero h1 { font-family: var(--font-anthropic-serif); font-weight: 400; font-size: calc(var(--cds-font-size-title) * 1.5); line-height: 1.1; margin: 0; text-wrap: balance; }
+  .vx-lede { margin: var(--cds-gap-sm) 0 0; color: var(--color-fg-muted); max-width: 60ch; }
+  .vx-lede b { color: var(--color-fg); font-weight: 600; }
+  .vx-lede a { color: inherit; }
+  .vx-clock { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; text-align: right; }
+  .vx-clock .vx-big { font-family: var(--font-anthropic-serif); font-size: var(--cds-font-size-title); font-variant-numeric: tabular-nums; }
+  .vx-pill { display: inline-flex; align-items: center; gap: 6px; font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
+  .vx-pill::before { content: ""; width: .5rem; height: .5rem; border-radius: 50%; background: var(--color-ok); }
+
+  .vx-filters { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--color-bg); display: flex; flex-direction: column; gap: var(--cds-gap-sm); padding: var(--cds-pad-sm) 0; border-bottom: 1px solid var(--color-border-line); }
+  .vx-chips { display: flex; flex-wrap: wrap; gap: var(--cds-gap-xs); min-height: 2rem; }
+  .vx-chip { font: inherit; font-size: var(--cds-font-size-caption); display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 999px; border: 1px solid var(--color-border-line); background: var(--color-panel); color: var(--color-fg); cursor: pointer; }
+  .vx-chip i { width: .55rem; height: .55rem; border-radius: 50%; flex: none; }
+  .vx-chip small { color: var(--color-fg-muted); font-size: inherit; font-variant-numeric: tabular-nums; }
+  .vx-chip[aria-pressed=true] { border-color: var(--color-fg); box-shadow: inset 0 0 0 1px var(--color-fg); }
+  .vx-chip:focus-visible, .vx button:focus-visible, .vx select:focus-visible, .vx input:focus-visible { outline: 2px solid var(--color-fg); outline-offset: 2px; }
+  .vx-row { display: flex; flex-wrap: wrap; gap: var(--cds-gap-sm) var(--cds-gap-md); align-items: center; }
+  .vx-row label { display: inline-flex; gap: 6px; align-items: center; font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
+  .vx select, .vx input[type=search] { font: inherit; font-size: var(--cds-font-size-caption); padding: 4px 8px; border: 1px solid var(--color-border-line); border-radius: var(--cds-radius); background: var(--color-panel); color: var(--color-fg); }
+  .vx input[type=search] { flex: 1; min-width: 12rem; font-size: var(--cds-font-size-body); }
+  .vx-btn { font: inherit; font-size: var(--cds-font-size-caption); padding: 4px 10px; border: 1px solid var(--color-border-line); border-radius: var(--cds-radius); background: var(--color-panel); color: var(--color-fg); cursor: pointer; }
+
+  .vx-tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 10.5rem), 1fr)); gap: var(--cds-gap-md); }
+  .vx-card { background: var(--color-panel); border: 1px solid var(--color-border-line); border-radius: var(--cds-radius); padding: var(--cds-pad-lg); min-width: 0; }
+  .vx-tile { display: flex; flex-direction: column; gap: 4px; }
+  .vx-num { font-family: var(--font-anthropic-serif); font-weight: 400; font-size: var(--cds-font-size-title); font-variant-numeric: tabular-nums; min-height: 1.3em; }
+  .vx-label { color: var(--color-fg-muted); font-size: var(--cds-font-size-caption); }
+  .vx-sub { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); font-variant-numeric: tabular-nums; min-height: 1.2em; }
+  .vx-sub.vx-up { color: var(--color-ok); }
+
+  .vx-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 24rem), 1fr)); gap: var(--cds-gap-md); }
+  .vx-wide { grid-column: 1 / -1; }
+  .vx-card-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-start; gap: var(--cds-gap-sm); }
+  .vx-card h2 { font-size: var(--cds-font-size-heading); font-weight: var(--cds-font-weight-medium); margin: 0; }
+  .vx-note { color: var(--color-fg-muted); font-size: var(--cds-font-size-caption); margin: 4px 0 var(--cds-gap-md); }
+  .vx-chart { position: relative; min-height: 240px; }
+  .vx-chart.vx-tall { min-height: 300px; }
+  .vx-chart svg { display: block; overflow: visible; }
+  .vx-chart .vx-hit { cursor: pointer; }
+  .vx-empty { color: var(--color-fg-muted); font-size: var(--cds-font-size-caption); padding: var(--cds-pad-lg) 0; }
+  .vx-tip { position: absolute; z-index: 3; pointer-events: none; background: var(--cds-surface-popover); border: 1px solid var(--cds-border); border-radius: var(--cds-radius); box-shadow: var(--cds-shadow-popover); padding: var(--cds-pad-xs) var(--cds-pad-sm); font-size: var(--cds-font-size-caption); white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .vx-tip .vx-tip-h { color: var(--cds-text-secondary); margin-bottom: 2px; }
+  .vx-tip .vx-tip-r { display: flex; align-items: center; gap: 6px; }
+  .vx-tip i { width: .5rem; height: .5rem; border-radius: 50%; display: inline-block; }
+
+  .vx-scroll { max-height: 34rem; overflow: auto; }
+  .vx table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; font-size: var(--cds-font-size-body); }
+  .vx th, .vx td { padding: 6px var(--cds-pad-sm); border-bottom: 1px solid var(--color-border-line); text-align: left; white-space: nowrap; }
+  .vx th { position: sticky; top: 0; background: var(--color-panel); color: var(--color-fg-muted); font-size: var(--cds-font-size-caption); font-weight: 600; z-index: 1; }
+  .vx-lots th { cursor: pointer; user-select: none; }
+  .vx-lots th[aria-sort=ascending]::after { content: " ↑"; }
+  .vx-lots th[aria-sort=descending]::after { content: " ↓"; }
+  .vx th.vx-r, .vx td.vx-r { text-align: right; }
+  .vx td.vx-t { white-space: normal; min-width: 14rem; }
+  .vx td.vx-t a { color: inherit; }
+  .vx-cat { display: inline-flex; align-items: center; gap: 6px; }
+  .vx-cat i { width: .5rem; height: .5rem; border-radius: 50%; flex: none; }
+  .vx-lots tbody tr { cursor: pointer; }
+  .vx-lots tbody tr:hover, .vx-lots tbody tr.vx-picked { background: var(--color-bg); }
+  .vx-bar { display: inline-block; height: 6px; border-radius: 3px; vertical-align: middle; margin-right: 6px; opacity: .85; }
+  .vx-up { color: var(--color-ok); font-weight: 600; }
+  .vx-closed { color: var(--color-fg-muted); }
+  .vx-legend-note { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
+  @media (max-width: 40rem) { .vx-hide-narrow { display: none; } .vx-clock { align-items: flex-start; text-align: left; } }
+  [data-dash-source-state=empty] { color: transparent; }
+  [data-dash-source-state=refreshing] { opacity: .5; transition: opacity var(--cds-dur-slow); }
+  @media (prefers-reduced-motion: no-preference) {
+    .vx-grow { animation: vx-grow var(--cds-dur-slow) var(--cds-ease-out) both; transform-origin: left center; }
+    @keyframes vx-grow { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+  }
+</style>
+
+<div class="vx">
+  <header class="vx-hero" id="overzicht">
+    <div class="vx-hero-text">
+      <p class="vx-eyebrow">Faillissementsveiling · Leiden · Auctivo</p>
+      <h1>Veiling Easyfiets Leiden</h1>
+      <p class="vx-lede">Laatste meting <b data-draw="moment" data-source="laatste" data-field="moment" data-row="0">—</b>. Sinds de meting daarvoor zijn <b data-draw="gewijzigd" data-source="laatste" data-field="gewijzigd" data-row="0">—</b> kavels gewijzigd. <a href="https://auctivo.net/nl/auction/b10e4c75-ae8c-4562-8f48-b853ec689a24" target="_blank" rel="noopener">Naar de veiling</a></p>
+    </div>
+    <div class="vx-clock">
+      <span class="vx-label">Eerste kavel sluit over</span>
+      <span class="vx-big" data-draw="countdown" data-source="kavels">—</span>
+      <span class="vx-pill">Dinsdag 10 november, 19:00 tot ca. 20:35</span>
+    </div>
+  </header>
+
+  <section class="vx-filters" id="filters" aria-label="Filters">
+    <div class="vx-chips" data-draw="chips" data-source="kavels" role="group" aria-label="Categorieën"></div>
+    <div class="vx-row">
+      <label>Status
+        <select id="vx-status">
+          <option value="alle">Alle kavels</option>
+          <option value="open">Nog open</option>
+          <option value="gesloten">Gesloten</option>
+        </select>
+      </label>
+      <label><input type="checkbox" id="vx-bod"> Alleen kavels met een bod</label>
+      <button type="button" class="vx-btn" id="vx-reset">Filters wissen</button>
+      <span class="vx-legend-note" data-draw="filtertext" data-source="kavels">—</span>
+    </div>
+  </section>
+
+  <section class="vx-tiles" id="totalen">
+    <div class="vx-card vx-tile"><span class="vx-label">Som van de hoogste biedingen</span><span class="vx-num" data-draw="tile" data-k="som" data-source="kavels">—</span><span class="vx-sub" data-draw="tilesub" data-k="som" data-source="kavels">—</span></div>
+    <div class="vx-card vx-tile"><span class="vx-label">Biedingen</span><span class="vx-num" data-draw="tile" data-k="biedingen" data-source="kavels">—</span><span class="vx-sub" data-draw="tilesub" data-k="biedingen" data-source="kavels">—</span></div>
+    <div class="vx-card vx-tile"><span class="vx-label">Kavels met een bod</span><span class="vx-num" data-draw="tile" data-k="metbod" data-source="kavels">—</span><span class="vx-sub" data-draw="tilesub" data-k="metbod" data-source="kavels">—</span></div>
+    <div class="vx-card vx-tile"><span class="vx-label">Gemiddeld bod per kavel met bod</span><span class="vx-num" data-draw="tile" data-k="gem" data-source="kavels">—</span><span class="vx-sub" data-draw="tilesub" data-k="gem" data-source="kavels">—</span></div>
+    <div class="vx-card vx-tile"><span class="vx-label">Hoogste bod</span><span class="vx-num" data-draw="tile" data-k="top" data-source="kavels">—</span><span class="vx-sub" data-draw="tilesub" data-k="top" data-source="kavels">—</span></div>
+  </section>
+
+  <section class="vx-grid" id="grafieken">
+    <div class="vx-card vx-wide" id="verloop">
+      <div class="vx-card-head">
+        <div>
+          <h2>Verloop per meting</h2>
+          <p class="vx-note">Eén punt per meting: elke 3 uur tot 3 november 17:00, daarna elke 15 minuten.</p>
+        </div>
+        <div class="vx-row">
+          <label>Toon
+            <select id="vx-trend-maat">
+              <option value="bod">Som van de hoogste biedingen</option>
+              <option value="biedingen">Aantal biedingen</option>
+              <option value="metbod">Kavels met een bod</option>
+            </select>
+          </label>
+          <label>Lijnen
+            <select id="vx-trend-split">
+              <option value="totaal">Eén lijn (totaal)</option>
+              <option value="categorie">Per categorie</option>
+            </select>
+          </label>
+        </div>
+      </div>
+      <div class="vx-chart vx-tall" data-draw="trend" data-source="metingen_cat"></div>
+    </div>
+
+    <div class="vx-card" id="per-categorie">
+      <div class="vx-card-head">
+        <div>
+          <h2>Per categorie</h2>
+          <p class="vx-note">Klik op een balk om op die categorie te filteren.</p>
+        </div>
+        <label class="vx-row">
+          <select id="vx-cat-maat" aria-label="Maat per categorie">
+            <option value="bod">Som van de hoogste biedingen</option>
+            <option value="biedingen">Aantal biedingen</option>
+            <option value="gem">Gemiddeld bod per kavel met bod</option>
+            <option value="aandeel">Aandeel kavels met een bod</option>
+          </select>
+        </label>
+      </div>
+      <div class="vx-chart" data-draw="percat" data-source="kavels"></div>
+    </div>
+
+    <div class="vx-card" id="top">
+      <div class="vx-card-head">
+        <div>
+          <h2>Topkavels</h2>
+          <p class="vx-note">Klik op een balk voor de geschiedenis van die kavel.</p>
+        </div>
+        <div class="vx-row">
+          <select id="vx-top-maat" aria-label="Rangschik op">
+            <option value="bod">Hoogste bod</option>
+            <option value="biedingen">Meeste biedingen</option>
+            <option value="factor">Bod t.o.v. minimum</option>
+            <option value="erbij">Meeste biedingen erbij</option>
+          </select>
+          <select id="vx-top-n" aria-label="Aantal kavels">
+            <option value="10">Top 10</option>
+            <option value="15">Top 15</option>
+            <option value="25">Top 25</option>
+          </select>
+        </div>
+      </div>
+      <div class="vx-chart vx-tall" data-draw="top" data-source="kavels"></div>
+    </div>
+
+    <div class="vx-card vx-wide" id="activiteit">
+      <div class="vx-card-head">
+        <div>
+          <h2>Nieuwe biedingen per meting</h2>
+          <p class="vx-note">Hoeveel biedingen er bij kwamen sinds de meting daarvoor. Tot 3 november 17:00 telt een balk 3 uur, daarna 15 minuten.</p>
+        </div>
+      </div>
+      <div class="vx-chart" data-draw="activity" data-source="metingen_cat"></div>
+    </div>
+  </section>
+
+  <section class="vx-card" id="kavels">
+    <div class="vx-card-head">
+      <div>
+        <h2>Alle kavels</h2>
+        <p class="vx-note">Klik op een kavel voor de geschiedenis. Klik op een kolomkop om te sorteren.</p>
+      </div>
+    </div>
+    <div class="vx-row" style="margin-bottom: var(--cds-gap-sm)">
+      <input type="search" id="vx-q" placeholder="Zoek op kavelnummer of omschrijving" aria-label="Zoek kavel">
+      <label><input type="checkbox" id="vx-changed"> Alleen gewijzigd sinds vorige meting</label>
+    </div>
+    <div class="vx-scroll">
+      <table class="vx-lots" data-source="kavels" data-row-key="kavel">
+        <thead><tr>
+          <th data-field="kavel" data-sort="kavel" aria-sort="ascending">Kavel</th>
+          <th data-field="titel" data-sort="titel">Omschrijving</th>
+          <th data-field="categorie" data-sort="categorie" class="vx-hide-narrow">Categorie</th>
+          <th data-field="minimum" data-sort="minimum" class="vx-r vx-hide-narrow">Minimum</th>
+          <th data-field="hoogste_bod" data-sort="hoogste_bod" class="vx-r">Hoogste bod</th>
+          <th data-field="biedingen" data-sort="biedingen" class="vx-r">Biedingen</th>
+          <th data-field="bod_erbij" data-sort="bod_erbij" class="vx-r">Bod erbij</th>
+          <th data-field="laatste_wijziging" data-sort="laatste_wijziging" class="vx-hide-narrow">Laatste wijziging</th>
+          <th data-field="sluit" data-sort="sluit" class="vx-hide-narrow">Sluit</th>
+        </tr></thead>
+        <tbody data-draw="kavels"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="vx-card" id="wijzigingen">
+    <div class="vx-card-head">
+      <div>
+        <h2>Geschiedenis van de biedingen</h2>
+        <p class="vx-note">Elke wijziging die een meting heeft gezien, nieuwste eerst. Biedingen tussen twee metingen in tellen op bij het aantal en zijn niet los zichtbaar.</p>
+      </div>
+      <button type="button" class="vx-btn" id="vx-all" hidden>Toon alle kavels</button>
+    </div>
+    <div class="vx-scroll">
+      <table data-source="wijzigingen" data-row-key="moment,kavel">
+        <thead><tr>
+          <th data-field="moment">Moment</th>
+          <th data-field="kavel">Kavel</th>
+          <th data-field="titel" class="vx-hide-narrow">Omschrijving</th>
+          <th data-field="bod_voor" class="vx-r">Bod voor</th>
+          <th data-field="bod_na" class="vx-r">Bod na</th>
+          <th data-field="biedingen_voor" class="vx-r vx-hide-narrow">Biedingen voor</th>
+          <th data-field="biedingen_na" class="vx-r">Biedingen na</th>
+          <th data-field="opmerking" class="vx-hide-narrow">Opmerking</th>
+        </tr></thead>
+        <tbody data-draw="wijzigingen"></tbody>
+      </table>
+      <p class="vx-empty" id="vx-nohistory" hidden>Nog geen wijzigingen gezien. De volgende meting vult deze lijst.</p>
+    </div>
+  </section>
+</div>
+
+<script>
+  const byMoment = (a, b) => (a.moment < b.moment ? -1 : a.moment > b.moment ? 1 : 0);
+  dash.calc('kavels', { inputs: ['veiling'], title: 'Kavels nu', description: 'De rijen van soort "kavel": elke kavel bij de laatste meting.',
+    fn: (veiling) => veiling.filter((r) => r.soort === 'kavel') });
+  dash.calc('wijzigingen', { inputs: ['veiling'], title: 'Wijzigingen per meting', description: 'De rijen van soort "wijziging", nieuwste eerst.',
+    fn: (veiling) => veiling.filter((r) => r.soort === 'wijziging').sort((a, b) => (a.moment < b.moment ? 1 : a.moment > b.moment ? -1 : a.kavel - b.kavel)) });
+  dash.calc('metingen_cat', { inputs: ['veiling'], title: 'Totalen per categorie per meting', description: 'De rijen van soort "meting_categorie", oudste eerst.',
+    fn: (veiling) => veiling.filter((r) => r.soort === 'meting_categorie').sort((a, b) => (a.moment < b.moment ? -1 : a.moment > b.moment ? 1 : 0)) });
+  dash.calc('laatste', { inputs: ['veiling'], title: 'Laatste meting', description: 'De totalen van de laatste meting, plus het aantal kavels dat sinds de meting daarvoor is gewijzigd.',
+    fn: (veiling) => {
+      const m = veiling.filter((r) => r.soort === 'meting').sort((a, b) => (a.moment < b.moment ? -1 : 1));
+      const last = m[m.length - 1];
+      if (!last) return [];
+      const gewijzigd = veiling.filter((r) => r.soort === 'kavel' && (r.bod_erbij !== 0 || r.biedingen_erbij !== 0)).length;
+      return [{ ...last, gewijzigd }];
+    } });
+
+  // ---- shared helpers (on window: every script runs in its own scope) ----
+  const V = (window.vx = window.vx || { sort: 'kavel', dir: 1, picked: null });
+  V.TZ = 'Europe/Amsterdam';
+  V.eur = (v) => (v == null ? '–' : '€ ' + Number(v).toLocaleString('nl-NL', { minimumFractionDigits: v % 1 ? 2 : 0, maximumFractionDigits: 2 }));
+  V.int = (v) => Number(v).toLocaleString('nl-NL');
+  V.when = (iso) => (iso ? new Date(iso).toLocaleString('nl-NL', { timeZone: V.TZ, weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : '');
+  V.short = (d) => d.toLocaleString('nl-NL', { timeZone: V.TZ, day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+  V.params = () => {
+    const p = dash.params();
+    return { cats: Array.isArray(p.cats) ? p.cats : [], status: p.status || 'alle', bod: !!p.alleen_bod,
+      trendMaat: p.trend_maat || 'bod', trendSplit: p.trend_split || 'totaal', catMaat: p.cat_maat || 'bod',
+      topMaat: p.top_maat || 'bod', topN: Number(p.top_n) || 10 };
+  };
+  // Category order and colour follow the lowest lot number in each category, so they never shift.
+  V.categories = (lots) => {
+    const first = new Map();
+    for (const r of lots) if (!first.has(r.categorie) || r.kavel < first.get(r.categorie)) first.set(r.categorie, r.kavel);
+    return [...first.keys()].sort((a, b) => first.get(a) - first.get(b));
+  };
+  V.color = (cats, c) => dash.colors[cats.indexOf(c) % dash.colors.length];
+  V.filterLots = (lots) => {
+    const p = V.params();
+    return lots.filter((r) => (!p.cats.length || p.cats.includes(r.categorie))
+      && (p.status === 'alle' || (p.status === 'open' ? r.open : !r.open))
+      && (!p.bod || r.biedingen > 0));
+  };
+  V.catSelected = (c) => { const p = V.params(); return !p.cats.length || p.cats.includes(c); };
+  V.tip = (el) => {
+    let t = el.querySelector(':scope > .vx-tip');
+    if (!t) { t = document.createElement('div'); t.className = 'vx-tip'; t.style.display = 'none'; el.append(t); }
+    return {
+      show(x, y, head, rows) {
+        t.replaceChildren();
+        const h = document.createElement('div'); h.className = 'vx-tip-h'; h.textContent = head; t.append(h);
+        for (const r of rows) {
+          const d = document.createElement('div'); d.className = 'vx-tip-r';
+          if (r.color) { const i = document.createElement('i'); i.style.background = r.color; d.append(i); }
+          d.append(document.createTextNode(r.text)); t.append(d);
+        }
+        t.style.display = '';
+        const tw = t.offsetWidth, th = t.offsetHeight;
+        t.style.left = Math.min(Math.max(0, x + 12), el.clientWidth - tw) + 'px';
+        t.style.top = Math.max(0, y - th - 8) + 'px';
+      },
+      hide() { t.style.display = 'none'; },
+    };
+  };
+  V.measure = (svg, texts) => {
+    const probe = svg.append('text').attr('font-size', 12);
+    let w = 0;
+    for (const s of texts) { probe.text(s); w = Math.max(w, probe.node().getComputedTextLength()); }
+    probe.remove();
+    return w;
+  };
+  V.empty = (el, text) => { const p = document.createElement('p'); p.className = 'vx-empty'; p.textContent = text; el.append(p); };
+  V.failed = (el) => { const p = document.createElement('p'); p.className = 'vx-empty'; p.textContent = 'Failed to load'; el.append(p); };
+
+  // Horizontal bar chart: items [{key, label, value, color, text}]
+  V.hbar = (el, items, fmt, onPick, tipRows) => {
+    const w = Math.max(260, el.clientWidth);
+    const rowH = 28, top = 4, h = top + items.length * rowH + 4;
+    const svg = d3.select(el).append('svg').attr('width', '100%').attr('viewBox', `0 0 ${w} ${h}`);
+    const labelW = Math.min(V.measure(svg, items.map((d) => d.label)) + 10, w * 0.45);
+    const valW = V.measure(svg, items.map((d) => fmt(d.value))) + 10;
+    const x = d3.scaleLinear([0, d3.max(items, (d) => d.value) || 1], [labelW, w - valW]);
+    const g = svg.selectAll('g.vx-hit').data(items).join('g').attr('class', 'vx-hit').attr('transform', (d, i) => `translate(0,${top + i * rowH})`);
+    g.append('text').attr('x', labelW - 8).attr('y', rowH / 2).attr('dy', '0.32em').attr('text-anchor', 'end')
+      .attr('font-size', 12).attr('fill', 'var(--color-fg)').text((d) => d.label)
+      .each(function (d) { let s = d.label; while (this.getComputedTextLength() > labelW - 12 && s.length > 4) { s = s.slice(0, -2); this.textContent = s + '…'; } });
+    g.append('rect').attr('class', 'vx-grow').attr('x', labelW).attr('y', 6).attr('height', rowH - 12).attr('rx', 3)
+      .attr('width', (d) => Math.max(2, x(d.value) - labelW)).attr('fill', (d) => d.color);
+    g.append('text').attr('x', (d) => Math.max(labelW + 2, x(d.value)) + 6).attr('y', rowH / 2).attr('dy', '0.32em')
+      .attr('font-size', 12).attr('fill', 'var(--color-fg-muted)').text((d) => fmt(d.value));
+    g.append('rect').attr('x', 0).attr('y', 0).attr('width', w).attr('height', rowH).attr('fill', 'transparent');
+    const tip = V.tip(el);
+    g.on('pointermove', (event, d) => { const [px, py] = d3.pointer(event, el); tip.show(px, py, d.label, tipRows(d)); })
+      .on('pointerleave', () => tip.hide())
+      .on('click', (event, d) => onPick(d));
+  };
+
+  // ---- header ----
+  dash.draw('moment', (el) => {
+    const d = dash.data('laatste');
+    el.textContent = d.status === 'ok' && d.data[0] ? V.when(d.data[0].moment) : '—';
+  });
+  dash.draw('gewijzigd', (el) => {
+    const d = dash.data('laatste');
+    el.textContent = d.status === 'ok' && d.data[0] ? String(d.data[0].gewijzigd) : '—';
+  });
+  dash.draw('countdown', (el) => {
+    const d = dash.data('kavels');
+    if (d.status !== 'ok') { el.textContent = '—'; return; }
+    const open = d.data.filter((r) => r.open).map((r) => Date.parse(r.sluit));
+    if (!open.length) { el.textContent = 'Gesloten'; return; }
+    const ms = Math.min(...open) - Date.now();
+    if (ms <= 0) { el.textContent = 'Nu bezig'; return; }
+    const dd = Math.floor(ms / 864e5), hh = Math.floor((ms % 864e5) / 36e5), mm = Math.floor((ms % 36e5) / 6e4);
+    el.textContent = dd ? `${dd} d ${hh} u` : `${hh} u ${mm} min`;
+  });
+
+  // ---- filters ----
+  dash.draw('chips', (el) => {
+    const d = dash.data('kavels');
+    el.replaceChildren();
+    if (d.status !== 'ok') { el.textContent = '—'; return; }
+    const cats = V.categories(d.data);
+    const p = V.params();
+    const mk = (label, count, color, pressed, onClick) => {
+      const b = document.createElement('button'); b.type = 'button'; b.className = 'vx-chip'; b.setAttribute('aria-pressed', String(pressed));
+      if (color) { const i = document.createElement('i'); i.style.background = color; b.append(i); }
+      b.append(document.createTextNode(label));
+      const s = document.createElement('small'); s.textContent = String(count); b.append(s);
+      b.addEventListener('click', onClick);
+      el.append(b);
+    };
+    mk('Alle categorieën', d.data.length, null, !p.cats.length, () => dash.setParams({ cats: [] }));
+    for (const c of cats) {
+      const n = d.data.filter((r) => r.categorie === c).length;
+      mk(c, n, V.color(cats, c), p.cats.includes(c), () => {
+        const cur = V.params().cats;
+        const next = cur.includes(c) ? cur.filter((x) => x !== c) : [...cur, c];
+        dash.setParams({ cats: next.length === cats.length ? [] : next });
+      });
+    }
+  });
+  dash.draw('filtertext', (el) => {
+    const d = dash.data('kavels');
+    if (d.status !== 'ok') { el.textContent = '—'; return; }
+    const n = V.filterLots(d.data).length;
+    el.textContent = n === d.data.length ? `Alle ${n} kavels` : `${n} van ${d.data.length} kavels geselecteerd`;
+  });
+
+  // ---- tiles ----
+  V.tileStats = () => {
+    const d = dash.data('kavels');
+    if (d.status !== 'ok') return null;
+    const rows = V.filterLots(d.data);
+    const met = rows.filter((r) => r.biedingen > 0);
+    const som = d3.sum(rows, (r) => r.hoogste_bod);
+    const top = d3.greatest(rows, (r) => r.hoogste_bod);
+    return { rows, met, som, biedingen: d3.sum(rows, (r) => r.biedingen), bodErbij: d3.sum(rows, (r) => r.bod_erbij),
+      biedingenErbij: d3.sum(rows, (r) => r.biedingen_erbij), gem: met.length ? som / met.length : null,
+      minimum: d3.sum(met, (r) => r.minimum), top };
+  };
+  dash.draw('tile', (el) => {
+    const s = V.tileStats();
+    if (!s) { el.textContent = '—'; return; }
+    const k = el.dataset.k;
+    el.textContent = k === 'som' ? V.eur(s.som) : k === 'biedingen' ? V.int(s.biedingen) : k === 'metbod' ? `${s.met.length} / ${s.rows.length}`
+      : k === 'gem' ? (s.gem == null ? '–' : V.eur(Math.round(s.gem))) : (s.top && s.top.biedingen ? V.eur(s.top.hoogste_bod) : '–');
+  });
+  dash.draw('tilesub', (el) => {
+    const s = V.tileStats();
+    if (!s) { el.textContent = '—'; return; }
+    const k = el.dataset.k;
+    let t = '', up = false;
+    if (k === 'som') { t = s.bodErbij ? `+${V.eur(s.bodErbij)} sinds vorige meting` : 'Geen verandering sinds vorige meting'; up = s.bodErbij > 0; }
+    if (k === 'biedingen') { t = s.biedingenErbij ? `+${V.int(s.biedingenErbij)} sinds vorige meting` : 'Geen nieuwe sinds vorige meting'; up = s.biedingenErbij > 0; }
+    if (k === 'metbod') t = s.rows.length ? `${Math.round((s.met.length / s.rows.length) * 100)}% van de selectie` : '';
+    if (k === 'gem') t = s.minimum ? `${(s.som / s.minimum).toLocaleString('nl-NL', { maximumFractionDigits: 1 })}× het minimumbod` : '';
+    if (k === 'top') t = s.top && s.top.biedingen ? `Kavel ${s.top.kavel}: ${s.top.titel}` : '';
+    el.textContent = t;
+    el.classList.toggle('vx-up', up);
+  });
+
+  // ---- trend ----
+  dash.draw('trend', (el) => {
+    el.replaceChildren();
+    const d = dash.data('metingen_cat'), k = dash.data('kavels');
+    if (d.status === 'error') { V.failed(el); return; }
+    if (d.status !== 'ok' || k.status !== 'ok') return;
+    const p = V.params();
+    const cats = V.categories(k.data);
+    const field = { bod: 'totaal_bod', biedingen: 'totaal_biedingen', metbod: 'kavels_met_bod' }[p.trendMaat];
+    const fmt = p.trendMaat === 'bod' ? V.eur : V.int;
+    const rows = d.data.filter((r) => V.catSelected(r.categorie));
+    const moments = [...new Set(rows.map((r) => r.moment))];
+    let series;
+    if (p.trendSplit === 'categorie') {
+      series = cats.filter(V.catSelected).map((c) => ({ name: c, color: V.color(cats, c),
+        points: rows.filter((r) => r.categorie === c).map((r) => ({ t: new Date(r.moment), v: Number(r[field]) })) }));
+    } else {
+      series = [{ name: 'Selectie', color: dash.colors[0], points: moments.map((m) => ({ t: new Date(m), v: d3.sum(rows.filter((r) => r.moment === m), (r) => Number(r[field])) })) }];
+    }
+    if (!moments.length) { V.empty(el, 'Geen metingen voor deze selectie.'); return; }
+    const w = Math.max(280, el.clientWidth), h = 300;
+    const svg = d3.select(el).append('svg').attr('width', '100%').attr('viewBox', `0 0 ${w} ${h}`);
+    const maxV = d3.max(series, (s) => d3.max(s.points, (q) => q.v)) || 1;
+    const y = d3.scaleLinear([0, maxV * 1.08], [h - 26, 10]).nice();
+    const yTicks = y.ticks(5);
+    const left = V.measure(svg, yTicks.map(fmt)) + 12;
+    const t0 = new Date(moments[0]), t1 = new Date(moments[moments.length - 1]);
+    const x = d3.scaleUtc(+t0 < +t1 ? [t0, t1] : [d3.utcHour.offset(t0, -2), d3.utcHour.offset(t0, 2)], [left, w - 14]);
+    svg.append('g').selectAll('line').data(yTicks).join('line').attr('x1', left).attr('x2', w - 14)
+      .attr('y1', (v) => y(v)).attr('y2', (v) => y(v)).attr('stroke', 'var(--cds-chart-grid)');
+    svg.append('g').selectAll('text').data(yTicks).join('text').attr('x', left - 8).attr('y', (v) => y(v)).attr('dy', '0.32em')
+      .attr('text-anchor', 'end').attr('font-size', 12).attr('fill', 'var(--color-fg-muted)').text(fmt);
+    const xLabels = svg.append('g').selectAll('text').data(x.ticks(Math.max(2, Math.floor((w - left) / 120)))).join('text')
+      .attr('x', (t) => x(t)).attr('y', h - 6).attr('text-anchor', 'middle').attr('font-size', 12).attr('fill', 'var(--color-fg-muted)').text(V.short);
+    let lastRight = -Infinity;
+    xLabels.each(function (t) {
+      const half = this.getComputedTextLength() / 2;
+      const cx = Math.min(Math.max(x(t), left + half), w - 2 - half);
+      if (cx - half < lastRight + 10) { this.remove(); return; }
+      this.setAttribute('x', cx); lastRight = cx + half;
+    });
+    if (series.length === 1) {
+      const gid = 'vxfade' + Math.random().toString(36).slice(2, 8);
+      const grad = svg.append('defs').append('linearGradient').attr('id', gid).attr('x1', 0).attr('x2', 0).attr('y1', 0).attr('y2', 1);
+      [[0, .26], [.25, .16], [.5, .08], [.75, .03], [1, 0]].forEach(([o, a]) => grad.append('stop').attr('offset', o).attr('style', `stop-color:${series[0].color};stop-opacity:${a}`));
+      svg.append('path').datum(series[0].points).attr('fill', `url(#${gid})`).attr('d', d3.area((q) => x(q.t), y(0), (q) => y(q.v)));
+    }
+    for (const s of series) {
+      svg.append('path').datum(s.points).attr('fill', 'none').attr('stroke', s.color).attr('stroke-width', 2)
+        .attr('stroke-linecap', 'round').attr('stroke-linejoin', 'round').attr('d', d3.line((q) => x(q.t), (q) => y(q.v)));
+      const last = s.points[s.points.length - 1];
+      if (last) svg.append('circle').attr('cx', x(last.t)).attr('cy', y(last.v)).attr('r', 3.5).attr('fill', s.color);
+    }
+    const rule = svg.append('line').attr('y1', 10).attr('y2', h - 26).attr('stroke', 'var(--cds-chart-axis)').style('display', 'none');
+    const tip = V.tip(el);
+    svg.append('rect').attr('x', left).attr('y', 0).attr('width', w - 14 - left).attr('height', h - 26).attr('fill', 'transparent')
+      .on('pointermove', (event) => {
+        const [px] = d3.pointer(event);
+        const m = moments[d3.leastIndex(moments, (mm) => Math.abs(x(new Date(mm)) - px))];
+        const tx = x(new Date(m));
+        rule.style('display', null).attr('x1', tx).attr('x2', tx);
+        const rowsAt = series.map((s) => ({ s, q: s.points.find((q) => +q.t === +new Date(m)) })).filter((r) => r.q)
+          .sort((a, b) => b.q.v - a.q.v);
+        const [, py] = d3.pointer(event, el);
+        tip.show(tx * (el.clientWidth / w), py, V.when(m), rowsAt.map((r) => ({ color: series.length > 1 ? r.s.color : null, text: `${series.length > 1 ? r.s.name + ': ' : ''}${fmt(r.q.v)}` })));
+      })
+      .on('pointerleave', () => { rule.style('display', 'none'); tip.hide(); });
+  });
+
+  // ---- per category ----
+  dash.draw('percat', (el) => {
+    el.replaceChildren();
+    const d = dash.data('kavels');
+    if (d.status === 'error') { V.failed(el); return; }
+    if (d.status !== 'ok') return;
+    const p = V.params();
+    const cats = V.categories(d.data);
+    const base = d.data.filter((r) => (p.status === 'alle' || (p.status === 'open' ? r.open : !r.open)) && (!p.bod || r.biedingen > 0));
+    const fmt = p.catMaat === 'aandeel' ? (v) => Math.round(v * 100) + '%' : p.catMaat === 'biedingen' ? V.int : (v) => V.eur(Math.round(v));
+    const items = cats.map((c) => {
+      const rs = base.filter((r) => r.categorie === c), met = rs.filter((r) => r.biedingen > 0);
+      const som = d3.sum(rs, (r) => r.hoogste_bod);
+      const value = p.catMaat === 'bod' ? som : p.catMaat === 'biedingen' ? d3.sum(rs, (r) => r.biedingen)
+        : p.catMaat === 'gem' ? (met.length ? som / met.length : 0) : (rs.length ? met.length / rs.length : 0);
+      const sel = V.catSelected(c);
+      return { key: c, label: c, value, color: sel ? V.color(cats, c) : 'var(--cds-chart-muted)', n: rs.length, met: met.length, som, bied: d3.sum(rs, (r) => r.biedingen) };
+    }).sort((a, b) => b.value - a.value);
+    V.hbar(el, items, fmt,
+      (it) => { const cur = V.params().cats; dash.setParams({ cats: cur.length === 1 && cur[0] === it.key ? [] : [it.key] }); },
+      (it) => [{ text: `${V.eur(it.som)} · ${V.int(it.bied)} biedingen` }, { text: `${it.met} van ${it.n} kavels met een bod` }]);
+  });
+
+  // ---- top lots ----
+  dash.draw('top', (el) => {
+    el.replaceChildren();
+    const d = dash.data('kavels');
+    if (d.status === 'error') { V.failed(el); return; }
+    if (d.status !== 'ok') return;
+    const p = V.params();
+    const cats = V.categories(d.data);
+    const val = { bod: (r) => r.hoogste_bod, biedingen: (r) => r.biedingen, factor: (r) => (r.biedingen && r.minimum ? r.hoogste_bod / r.minimum : 0), erbij: (r) => r.biedingen_erbij }[p.topMaat];
+    const fmt = p.topMaat === 'bod' ? V.eur : p.topMaat === 'factor' ? (v) => v.toLocaleString('nl-NL', { maximumFractionDigits: 1 }) + '×' : V.int;
+    const items = V.filterLots(d.data).filter((r) => val(r) > 0).sort((a, b) => val(b) - val(a)).slice(0, p.topN)
+      .map((r) => ({ key: r.kavel, label: `${r.kavel} · ${r.titel}`, value: val(r), color: V.color(cats, r.categorie), r }));
+    if (!items.length) { V.empty(el, p.topMaat === 'erbij' ? 'Geen nieuwe biedingen sinds de vorige meting in deze selectie.' : 'Geen kavels met een bod in deze selectie.'); return; }
+    V.hbar(el, items, fmt,
+      (it) => V.pick(it.key),
+      (it) => [{ color: it.color, text: it.r.categorie }, { text: `${V.eur(it.r.hoogste_bod)} · ${it.r.biedingen} biedingen · minimum ${V.eur(it.r.minimum)}` }]);
+  });
+
+  // ---- activity ----
+  dash.draw('activity', (el) => {
+    el.replaceChildren();
+    const d = dash.data('metingen_cat');
+    if (d.status === 'error') { V.failed(el); return; }
+    if (d.status !== 'ok') return;
+    const rows = d.data.filter((r) => V.catSelected(r.categorie));
+    const moments = [...new Set(rows.map((r) => r.moment))];
+    const totals = moments.map((m) => d3.sum(rows.filter((r) => r.moment === m), (r) => r.totaal_biedingen));
+    const bars = moments.slice(1).map((m, i) => ({ m, v: Math.max(0, totals[i + 1] - totals[i]) }));
+    if (!bars.length) { V.empty(el, 'Na de tweede meting verschijnt hier hoeveel biedingen er per meting bij kwamen.'); return; }
+    const w = Math.max(280, el.clientWidth), h = 220;
+    const svg = d3.select(el).append('svg').attr('width', '100%').attr('viewBox', `0 0 ${w} ${h}`);
+    const y = d3.scaleLinear([0, d3.max(bars, (b) => b.v) || 1], [h - 26, 10]).nice();
+    const yTicks = y.ticks(4).filter(Number.isInteger);
+    const left = V.measure(svg, yTicks.map(V.int)) + 12;
+    const x = d3.scaleBand(bars.map((b) => b.m), [left, w - 8]).padding(0.2);
+    svg.append('g').selectAll('line').data(yTicks).join('line').attr('x1', left).attr('x2', w - 8)
+      .attr('y1', (v) => y(v)).attr('y2', (v) => y(v)).attr('stroke', 'var(--cds-chart-grid)');
+    svg.append('g').selectAll('text').data(yTicks).join('text').attr('x', left - 8).attr('y', (v) => y(v)).attr('dy', '0.32em')
+      .attr('text-anchor', 'end').attr('font-size', 12).attr('fill', 'var(--color-fg-muted)').text(V.int);
+    const bw = Math.min(32, x.bandwidth());
+    const tip = V.tip(el);
+    svg.append('g').selectAll('rect').data(bars).join('rect')
+      .attr('x', (b) => x(b.m) + (x.bandwidth() - bw) / 2).attr('width', bw).attr('y', (b) => y(b.v)).attr('height', (b) => Math.max(0, y(0) - y(b.v)))
+      .attr('rx', 3).attr('fill', dash.colors[0])
+      .on('pointermove', (event, b) => { const [px, py] = d3.pointer(event, el); tip.show(px, py, V.when(b.m), [{ text: `${V.int(b.v)} nieuwe biedingen` }]); })
+      .on('pointerleave', () => tip.hide());
+    const every = Math.ceil(bars.length / Math.max(2, Math.floor((w - left) / 110)));
+    svg.append('g').selectAll('text').data(bars.filter((b, i) => i % every === 0)).join('text')
+      .attr('x', (b) => x(b.m) + x.bandwidth() / 2).attr('y', h - 6).attr('text-anchor', 'middle').attr('font-size', 12)
+      .attr('fill', 'var(--color-fg-muted)').text((b) => V.short(new Date(b.m)))
+      .each(function () { const half = this.getComputedTextLength() / 2; const cx = Number(this.getAttribute('x')); this.setAttribute('x', Math.min(Math.max(cx, left + half), w - 2 - half)); });
+  });
+
+  // ---- tables ----
+  V.pick = (n) => {
+    V.picked = V.picked === n ? null : n;
+    document.querySelectorAll('#vx-all').forEach((b) => { b.hidden = V.picked == null; });
+    dash.draw('kavels'); dash.draw('wijzigingen');
+    const none = !(V.historyRows() || []).length;
+    document.querySelectorAll('#vx-nohistory').forEach((e) => { e.hidden = !none; });
+    if (V.picked != null) document.querySelectorAll('#wijzigingen').forEach((s) => s.scrollIntoView({ behavior: 'smooth', block: 'start' }));
+  };
+  const cell = (tr, text, cls) => { const td = tr.insertCell(); td.textContent = text; if (cls) td.className = cls; return td; };
+  dash.draw('kavels', (el) => {
+    const d = dash.data('kavels');
+    el.replaceChildren();
+    if (d.status !== 'ok') return;
+    const cats = V.categories(d.data);
+    const q = (document.querySelector('#vx-q')?.value || '').trim().toLowerCase();
+    const onlyChanged = document.querySelector('#vx-changed')?.checked;
+    const maxBid = d3.max(d.data, (r) => r.hoogste_bod) || 1;
+    const rows = V.filterLots(d.data)
+      .filter((r) => (!q || String(r.kavel).includes(q) || String(r.titel).toLowerCase().includes(q)) && (!onlyChanged || r.bod_erbij !== 0 || r.biedingen_erbij !== 0))
+      .sort((a, b) => { const x = a[V.sort] ?? '', y = b[V.sort] ?? ''; return (x > y ? 1 : x < y ? -1 : 0) * V.dir; });
+    for (const r of rows) {
+      const tr = el.insertRow();
+      tr.dataset.key = String(r.kavel);
+      if (V.picked === r.kavel) tr.className = 'vx-picked';
+      cell(tr, String(r.kavel));
+      const t = tr.insertCell(); t.className = 'vx-t';
+      const a = document.createElement('a'); a.href = r.link; a.target = '_blank'; a.rel = 'noopener'; a.textContent = r.titel; t.append(a);
+      const c = tr.insertCell(); c.className = 'vx-hide-narrow';
+      const span = document.createElement('span'); span.className = 'vx-cat';
+      const dot = document.createElement('i'); dot.style.background = V.color(cats, r.categorie); span.append(dot, document.createTextNode(r.categorie)); c.append(span);
+      cell(tr, V.eur(r.minimum), 'vx-r vx-hide-narrow');
+      const b = tr.insertCell(); b.className = 'vx-r';
+      if (r.biedingen) {
+        const bar = document.createElement('span'); bar.className = 'vx-bar'; bar.style.width = Math.max(2, (r.hoogste_bod / maxBid) * 60) + 'px'; bar.style.background = V.color(cats, r.categorie);
+        b.append(bar, document.createTextNode(V.eur(r.hoogste_bod)));
+      } else b.textContent = '–';
+      cell(tr, String(r.biedingen), 'vx-r');
+      cell(tr, r.bod_erbij ? '+' + V.eur(r.bod_erbij) : '', 'vx-r' + (r.bod_erbij ? ' vx-up' : ''));
+      cell(tr, V.when(r.laatste_wijziging), 'vx-hide-narrow');
+      cell(tr, V.when(r.sluit) + (r.open ? '' : ' · gesloten'), 'vx-hide-narrow' + (r.open ? '' : ' vx-closed'));
+    }
+  });
+  V.historyRows = () => {
+    const d = dash.data('wijzigingen');
+    if (d.status !== 'ok') return null;
+    return d.data.filter((r) => (V.picked != null ? r.kavel === V.picked : V.catSelected(r.categorie)));
+  };
+  dash.draw('wijzigingen', (el) => {
+    el.replaceChildren();
+    const rows = V.historyRows();
+    if (!rows) return;
+    for (const r of rows) {
+      const tr = el.insertRow();
+      tr.dataset.key = encodeURIComponent(r.moment) + ',' + r.kavel;
+      cell(tr, V.when(r.moment));
+      cell(tr, String(r.kavel));
+      cell(tr, r.titel, 'vx-hide-narrow');
+      cell(tr, V.eur(r.bod_voor), 'vx-r');
+      cell(tr, V.eur(r.bod_na), 'vx-r');
+      cell(tr, r.biedingen_voor == null ? '–' : String(r.biedingen_voor), 'vx-r vx-hide-narrow');
+      cell(tr, String(r.biedingen_na), 'vx-r');
+      cell(tr, r.opmerking, 'vx-hide-narrow');
+    }
+  });
+
+  // ---- controls (fixed in HTML; scripts only listen and set value/checked/hidden/aria) ----
+  const bindSelect = (sel, name) => document.querySelectorAll(sel).forEach((s) => s.addEventListener('change', () => {
+    dash.setParams({ [name]: name === 'top_n' ? Number(s.value) : s.value });
+  }));
+  bindSelect('#vx-status', 'status');
+  bindSelect('#vx-trend-maat', 'trend_maat');
+  bindSelect('#vx-trend-split', 'trend_split');
+  bindSelect('#vx-cat-maat', 'cat_maat');
+  bindSelect('#vx-top-maat', 'top_maat');
+  bindSelect('#vx-top-n', 'top_n');
+  document.querySelectorAll('#vx-bod').forEach((c) => c.addEventListener('change', () => dash.setParams({ alleen_bod: c.checked })));
+  document.querySelectorAll('#vx-reset').forEach((b) => b.addEventListener('click', () => dash.resetParams()));
+  for (const sel of ['#vx-q', '#vx-changed']) document.querySelectorAll(sel).forEach((el) => el.addEventListener('input', () => dash.draw('kavels')));
+  document.querySelectorAll('.vx-lots thead').forEach((head) => head.addEventListener('click', (event) => {
+    const th = event.target.closest('th[data-sort]');
+    if (!th) return;
+    const k = th.dataset.sort;
+    V.dir = V.sort === k ? -V.dir : (['kavel', 'titel', 'categorie', 'sluit'].includes(k) ? 1 : -1);
+    V.sort = k;
+    head.querySelectorAll('th').forEach((h) => h.setAttribute('aria-sort', h === th ? (V.dir === 1 ? 'ascending' : 'descending') : 'none'));
+    dash.draw('kavels');
+  }));
+  document.querySelectorAll('.vx-lots tbody').forEach((body) => body.addEventListener('click', (event) => {
+    if (event.target.closest('a')) return;
+    const tr = event.target.closest('tr[data-key]');
+    if (tr) V.pick(Number(tr.dataset.key));
+  }));
+  document.querySelectorAll('#vx-all').forEach((b) => b.addEventListener('click', () => V.pick(V.picked)));
+
+  dash.onData(() => {
+    const p = V.params();
+    const set = (sel, v) => document.querySelectorAll(sel).forEach((s) => { if (s !== document.activeElement) s.value = String(v); });
+    set('#vx-status', p.status); set('#vx-trend-maat', p.trendMaat); set('#vx-trend-split', p.trendSplit);
+    set('#vx-cat-maat', p.catMaat); set('#vx-top-maat', p.topMaat); set('#vx-top-n', p.topN);
+    document.querySelectorAll('#vx-bod').forEach((c) => { c.checked = p.bod; });
+    const h = dash.data('wijzigingen');
+    const none = h.status === 'ok' && !(V.historyRows() || []).length;
+    document.querySelectorAll('#vx-nohistory').forEach((e) => { e.hidden = !none; });
+  });
+</script>

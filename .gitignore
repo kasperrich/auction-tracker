@@ -1,0 +1,12 @@
+# Regenerated on every measurement
+data/incoming.txt
+data/dashboard.json
+overzicht.html
+
+# Working copies for the claude.ai dashboard
+dashboard/index.doc.json
+dashboard/remote/
+
+# Old local folders, no longer used
+public/
+auction-tracker/
