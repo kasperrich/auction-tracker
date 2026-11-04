@@ -189,3 +189,120 @@
 {"t":"2026-11-04T10:14:21.400Z","n":116,"bid":4200,"cnt":6,"prevBid":2200,"prevCnt":4,"open":1,"closes":"2026-11-04T19:22:30Z","note":""}
 {"t":"2026-11-04T10:14:21.400Z","n":123,"bid":500,"cnt":3,"prevBid":300,"prevCnt":2,"open":1,"closes":"2026-11-04T19:28:20Z","note":""}
 {"t":"2026-11-04T10:14:21.400Z","n":129,"bid":500,"cnt":2,"prevBid":300,"prevCnt":1,"open":1,"closes":"2026-11-04T19:33:20Z","note":""}
+{"t":"2026-11-04T20:06:25.550Z","n":1,"bid":5000,"cnt":8,"prevBid":3000,"prevCnt":4,"open":0,"closes":"2026-11-04T18:05:13.856136Z","note":"sluittijd verlengd"}
+{"t":"2026-11-04T20:06:25.550Z","n":2,"bid":4500,"cnt":7,"prevBid":3500,"prevCnt":5,"open":0,"closes":"2026-11-04T18:03:30.303004Z","note":"sluittijd verlengd"}
+{"t":"2026-11-04T20:06:25.550Z","n":3,"bid":4200,"cnt":9,"prevBid":3200,"prevCnt":7,"open":0,"closes":"2026-11-04T18:01:40Z","note":"gesloten"}
+{"t":"2026-11-04T20:06:25.550Z","n":4,"bid":3500,"cnt":7,"prevBid":3500,"prevCnt":7,"open":0,"closes":"2026-11-04T18:02:30Z","note":"gesloten"}
+{"t":"2026-11-04T20:06:25.550Z","n":5,"bid":5000,"cnt":9,"prevBid":3000,"prevCnt":5,"open":0,"closes":"2026-11-04T18:03:47.760896Z","note":"sluittijd verlengd"}
+{"t":"2026-11-04T20:06:25.550Z","n":6,"bid":4000,"cnt":8,"prevBid":3000,"prevCnt":6,"open":0,"closes":"2026-11-04T18:04:10Z","note":"gesloten"}
+{"t":"2026-11-04T20:06:25.550Z","n":7,"bid":4000,"cnt":6,"prevBid":3500,"prevCnt":5,"open":0,"closes":"2026-11-04T18:05:00Z","note":"gesloten"}
+{"t":"2026-11-04T20:06:25.550Z","n":8,"bid":4500,"cnt":10,"prevBid":3500,"prevCnt":8,"open":0,"closes":"2026-11-04T18:05:50Z","note":"gesloten"}
+{"t":"2026-11-04T20:06:25.550Z","n":9,"bid":4500,"cnt":6,"prevBid":3500,"prevCnt":4,"open":0,"closes":"2026-11-04T18:06:40Z","note":"gesloten"}
+{"t":"2026-11-04T20:06:25.550Z","n":10,"bid":5000,"cnt":10,"prevBid":3500,"prevCnt":7,"open":0,"closes":"2026-11-04T18:09:02.268991Z","note":"sluittijd verlengd"}
+{"t":"2026-11-04T20:06:25.550Z","n":11,"bid":1200,"cnt":1,"prevBid":1200,"prevCnt":1,"open":0,"closes":"2026-11-04T18:08:20Z","note":"gesloten"}
+{"t":"2026-11-04T20:06:25.550Z","n":12,"bid":1200,"cnt":1,"prevBid":1200,"prevCnt":1,"open":0,"closes":"2026-11-04T18:09:10Z","note":"gesloten"}
+{"t":"2026-11-04T20:06:25.550Z","n":13,"bid":1200,"cnt":1,"prevBid":1200,"prevCnt":1,"open":0,"closes":"2026-11-04T18:10:00Z","note":"gesloten"}
+{"t":"2026-11-04T20:06:25.550Z","n":14,"bid":1200,"cnt":1,"prevBid":1200,"prevCnt":1,"open":0,"closes":"2026-11-04T18:10:50Z","note":"gesloten"}
+{"t":"2026-11-04T20:06:25.550Z","n":15,"bid":1600,"cnt":3,"prevBid":1400,"prevCnt":2,"open":0,"closes":"2026-11-04T18:11:40Z","note":"gesloten"}
+{"t":"2026-11-04T20:06:25.550Z","n":16,"bid":3400,"cnt":6,"prevBid":3400,"prevCnt":6,"open":0,"closes":"2026-11-04T18:12:30Z","note":"gesloten"}
+{"t":"2026-11-04T20:06:25.550Z","n":17,"bid":1000,"cnt":1,"prevBid":1000,"prevCnt":1,"open":0,"closes":"2026-11-04T18:13:20Z","note":"gesloten"}
+{"t":"2026-11-04T20:06:25.550Z","n":18,"bid":52000,"cnt":26,"prevBid":50000,"prevCnt":25,"open":0,"closes":"2026-11-04T18:17:05.816568Z","note":"sluittijd verlengd"}
+{"t":"2026-11-04T20:06:25.550Z","n":19,"bid":3500,"cnt":9,"prevBid":1400,"prevCnt":3,"open":0,"closes":"2026-11-04T18:17:49.382114Z","note":"sluittijd verlengd"}
+{"t":"2026-11-04T20:06:25.550Z","n":20,"bid":14000,"cnt":15,"prevBid":13500,"prevCnt":14,"open":0,"closes":"2026-11-04T18:15:50Z","note":"gesloten"}
+{"t":"2026-11-04T20:06:25.550Z","n":21,"bid":10500,"cnt":20,"prevBid":3500,"prevCnt":7,"open":0,"closes":"2026-11-04T18:28:43.413447Z","note":"sluittijd verlengd"}
+{"t":"2026-11-04T20:06:25.550Z","n":22,"bid":7500,"cnt":13,"prevBid":3500,"prevCnt":7,"open":0,"closes":"2026-11-04T18:22:12.717378Z","note":"sluittijd verlengd"}
+{"t":"2026-11-04T20:06:25.550Z","n":23,"bid":14000,"cnt":28,"prevBid":3500,"prevCnt":7,"open":0,"closes":"2026-11-04T18:43:18.45965Z","note":"sluittijd verlengd"}
+{"t":"2026-11-04T20:06:25.550Z","n":24,"bid":11000,"cnt":20,"prevBid":3200,"prevCnt":7,"open":0,"closes":"2026-11-04T18:31:45.324968Z","note":"sluittijd verlengd"}
+{"t":"2026-11-04T20:06:25.550Z","n":25,"bid":8000,"cnt":15,"prevBid":3500,"prevCnt":7,"open":0,"closes":"2026-11-04T18:22:45.965519Z","note":"sluittijd verlengd"}
+{"t":"2026-11-04T20:06:25.550Z","n":26,"bid":13000,"cnt":26,"prevBid":3500,"prevCnt":7,"open":0,"closes":"2026-11-04T18:38:09.026676Z","note":"sluittijd verlengd"}
+{"t":"2026-11-04T20:06:25.550Z","n":27,"bid":9500,"cnt":18,"prevBid":4000,"prevCnt":7,"open":0,"closes":"2026-11-04T18:24:26.824223Z","note":"sluittijd verlengd"}
+{"t":"2026-11-04T20:06:25.550Z","n":28,"bid":9500,"cnt":19,"prevBid":3500,"prevCnt":6,"open":0,"closes":"2026-11-04T18:24:20.197669Z","note":"sluittijd verlengd"}
+{"t":"2026-11-04T20:06:25.550Z","n":29,"bid":15500,"cnt":34,"prevBid":2000,"prevCnt":6,"open":0,"closes":"2026-11-04T18:30:19.167074Z","note":"sluittijd verlengd"}
+{"t":"2026-11-04T20:06:25.550Z","n":30,"bid":15500,"cnt":30,"prevBid":1600,"prevCnt":4,"open":0,"closes":"2026-11-04T18:30:10.684399Z","note":"sluittijd verlengd"}
+{"t":"2026-11-04T20:06:25.550Z","n":31,"bid":15800,"cnt":33,"prevBid":1600,"prevCnt":4,"open":0,"closes":"2026-11-04T18:31:30.343158Z","note":"sluittijd verlengd"}
+{"t":"2026-11-04T20:06:25.550Z","n":32,"bid":17100,"cnt":33,"prevBid":2000,"prevCnt":5,"open":0,"closes":"2026-11-04T18:35:13.238389Z","note":"sluittijd verlengd"}
+{"t":"2026-11-04T20:06:25.550Z","n":33,"bid":10500,"cnt":20,"prevBid":3500,"prevCnt":5,"open":0,"closes":"2026-11-04T18:30:26.380122Z","note":"sluittijd verlengd"}
+{"t":"2026-11-04T20:06:25.550Z","n":34,"bid":4100,"cnt":13,"prevBid":1900,"prevCnt":8,"open":0,"closes":"2026-11-04T18:28:40.777366Z","note":"sluittijd verlengd"}
+{"t":"2026-11-04T20:06:25.550Z","n":35,"bid":13000,"cnt":30,"prevBid":12500,"prevCnt":29,"open":0,"closes":"2026-11-04T18:28:20Z","note":"gesloten"}
+{"t":"2026-11-04T20:06:25.550Z","n":36,"bid":3500,"cnt":8,"prevBid":2500,"prevCnt":6,"open":0,"closes":"2026-11-04T18:29:10Z","note":"gesloten"}
+{"t":"2026-11-04T20:06:25.550Z","n":37,"bid":4500,"cnt":6,"prevBid":3500,"prevCnt":4,"open":0,"closes":"2026-11-04T18:35:48.15483Z","note":"sluittijd verlengd"}
+{"t":"2026-11-04T20:06:25.550Z","n":38,"bid":6000,"cnt":13,"prevBid":2500,"prevCnt":6,"open":0,"closes":"2026-11-04T18:33:05.693264Z","note":"sluittijd verlengd"}
+{"t":"2026-11-04T20:06:25.550Z","n":39,"bid":9500,"cnt":16,"prevBid":7500,"prevCnt":12,"open":0,"closes":"2026-11-04T18:34:16.663309Z","note":"sluittijd verlengd"}
+{"t":"2026-11-04T20:06:25.550Z","n":40,"bid":9500,"cnt":16,"prevBid":6000,"prevCnt":9,"open":0,"closes":"2026-11-04T18:34:04.280228Z","note":"sluittijd verlengd"}
+{"t":"2026-11-04T20:06:25.550Z","n":41,"bid":9000,"cnt":13,"prevBid":6000,"prevCnt":9,"open":0,"closes":"2026-11-04T18:33:55.756608Z","note":"sluittijd verlengd"}
+{"t":"2026-11-04T20:06:25.550Z","n":42,"bid":9500,"cnt":16,"prevBid":7000,"prevCnt":11,"open":0,"closes":"2026-11-04T18:36:59.701474Z","note":"sluittijd verlengd"}
+{"t":"2026-11-04T20:06:25.550Z","n":43,"bid":9000,"cnt":13,"prevBid":7500,"prevCnt":10,"open":0,"closes":"2026-11-04T18:35:00Z","note":"gesloten"}
+{"t":"2026-11-04T20:06:25.550Z","n":44,"bid":4500,"cnt":5,"prevBid":3000,"prevCnt":2,"open":0,"closes":"2026-11-04T18:35:50Z","note":"gesloten"}
+{"t":"2026-11-04T20:06:25.550Z","n":45,"bid":4000,"cnt":2,"prevBid":3500,"prevCnt":1,"open":0,"closes":"2026-11-04T18:36:40Z","note":"gesloten"}
+{"t":"2026-11-04T20:06:25.550Z","n":46,"bid":3000,"cnt":2,"prevBid":2500,"prevCnt":1,"open":0,"closes":"2026-11-04T18:37:30Z","note":"gesloten"}
+{"t":"2026-11-04T20:06:25.550Z","n":47,"bid":3000,"cnt":2,"prevBid":0,"prevCnt":0,"open":0,"closes":"2026-11-04T18:38:20Z","note":"gesloten"}
+{"t":"2026-11-04T20:06:25.550Z","n":48,"bid":3000,"cnt":2,"prevBid":2500,"prevCnt":1,"open":0,"closes":"2026-11-04T18:39:10Z","note":"gesloten"}
+{"t":"2026-11-04T20:06:25.550Z","n":49,"bid":3000,"cnt":2,"prevBid":0,"prevCnt":0,"open":0,"closes":"2026-11-04T18:40:00Z","note":"gesloten"}
+{"t":"2026-11-04T20:06:25.550Z","n":50,"bid":3000,"cnt":2,"prevBid":0,"prevCnt":0,"open":0,"closes":"2026-11-04T18:40:50Z","note":"gesloten"}
+{"t":"2026-11-04T20:06:25.550Z","n":51,"bid":3000,"cnt":2,"prevBid":2500,"prevCnt":1,"open":0,"closes":"2026-11-04T18:41:40Z","note":"gesloten"}
+{"t":"2026-11-04T20:06:25.550Z","n":52,"bid":4500,"cnt":5,"prevBid":3500,"prevCnt":3,"open":0,"closes":"2026-11-04T18:42:30Z","note":"gesloten"}
+{"t":"2026-11-04T20:06:25.550Z","n":53,"bid":3000,"cnt":2,"prevBid":0,"prevCnt":0,"open":0,"closes":"2026-11-04T18:43:20Z","note":"gesloten"}
+{"t":"2026-11-04T20:06:25.550Z","n":54,"bid":3500,"cnt":3,"prevBid":2500,"prevCnt":1,"open":0,"closes":"2026-11-04T18:44:10Z","note":"gesloten"}
+{"t":"2026-11-04T20:06:25.550Z","n":55,"bid":2500,"cnt":1,"prevBid":0,"prevCnt":0,"open":0,"closes":"2026-11-04T18:45:00Z","note":"gesloten"}
+{"t":"2026-11-04T20:06:25.550Z","n":56,"bid":5500,"cnt":7,"prevBid":0,"prevCnt":0,"open":0,"closes":"2026-11-04T18:55:11.844229Z","note":"sluittijd verlengd"}
+{"t":"2026-11-04T20:06:25.550Z","n":57,"bid":3500,"cnt":3,"prevBid":0,"prevCnt":0,"open":0,"closes":"2026-11-04T18:47:26.393086Z","note":"sluittijd verlengd"}
+{"t":"2026-11-04T20:06:25.550Z","n":58,"bid":4000,"cnt":4,"prevBid":3500,"prevCnt":3,"open":0,"closes":"2026-11-04T18:47:30Z","note":"gesloten"}
+{"t":"2026-11-04T20:06:25.550Z","n":59,"bid":5500,"cnt":2,"prevBid":5000,"prevCnt":1,"open":0,"closes":"2026-11-04T18:48:20Z","note":"gesloten"}
+{"t":"2026-11-04T20:06:25.550Z","n":60,"bid":5000,"cnt":6,"prevBid":3000,"prevCnt":2,"open":0,"closes":"2026-11-04T18:52:19.368935Z","note":"sluittijd verlengd"}
+{"t":"2026-11-04T20:06:25.550Z","n":61,"bid":1000,"cnt":1,"prevBid":0,"prevCnt":0,"open":0,"closes":"2026-11-04T19:39:35.696143Z","note":"sluittijd verlengd"}
+{"t":"2026-11-04T20:06:25.550Z","n":62,"bid":10300,"cnt":16,"prevBid":10300,"prevCnt":16,"open":0,"closes":"2026-11-04T18:50:50Z","note":"gesloten"}
+{"t":"2026-11-04T20:06:25.550Z","n":63,"bid":1000,"cnt":1,"prevBid":0,"prevCnt":0,"open":0,"closes":"2026-11-04T18:51:40Z","note":"gesloten"}
+{"t":"2026-11-04T20:06:25.550Z","n":80,"bid":4000,"cnt":11,"prevBid":1800,"prevCnt":5,"open":0,"closes":"2026-11-04T18:52:30Z","note":"gesloten"}
+{"t":"2026-11-04T20:06:25.550Z","n":81,"bid":5000,"cnt":13,"prevBid":2500,"prevCnt":7,"open":0,"closes":"2026-11-04T18:53:20Z","note":"gesloten"}
+{"t":"2026-11-04T20:06:25.550Z","n":82,"bid":2400,"cnt":6,"prevBid":1000,"prevCnt":1,"open":0,"closes":"2026-11-04T18:54:10Z","note":"gesloten"}
+{"t":"2026-11-04T20:06:25.550Z","n":83,"bid":10000,"cnt":26,"prevBid":1300,"prevCnt":5,"open":0,"closes":"2026-11-04T18:55:00Z","note":"gesloten"}
+{"t":"2026-11-04T20:06:25.550Z","n":84,"bid":59000,"cnt":60,"prevBid":6500,"prevCnt":8,"open":0,"closes":"2026-11-04T19:02:42.20746Z","note":"sluittijd verlengd"}
+{"t":"2026-11-04T20:06:25.550Z","n":85,"bid":3000,"cnt":2,"prevBid":3000,"prevCnt":2,"open":0,"closes":"2026-11-04T18:56:40Z","note":"gesloten"}
+{"t":"2026-11-04T20:06:25.550Z","n":86,"bid":5000,"cnt":13,"prevBid":4000,"prevCnt":11,"open":0,"closes":"2026-11-04T18:57:30Z","note":"gesloten"}
+{"t":"2026-11-04T20:06:25.550Z","n":87,"bid":11500,"cnt":18,"prevBid":4500,"prevCnt":4,"open":0,"closes":"2026-11-04T19:18:24.437057Z","note":"sluittijd verlengd"}
+{"t":"2026-11-04T20:06:25.550Z","n":88,"bid":1600,"cnt":4,"prevBid":1200,"prevCnt":2,"open":0,"closes":"2026-11-04T18:59:10Z","note":"gesloten"}
+{"t":"2026-11-04T20:06:25.550Z","n":89,"bid":3700,"cnt":10,"prevBid":1400,"prevCnt":3,"open":0,"closes":"2026-11-04T19:06:50.293159Z","note":"sluittijd verlengd"}
+{"t":"2026-11-04T20:06:25.550Z","n":90,"bid":1100,"cnt":4,"prevBid":1100,"prevCnt":4,"open":0,"closes":"2026-11-04T19:00:50Z","note":"gesloten"}
+{"t":"2026-11-04T20:06:25.550Z","n":91,"bid":15500,"cnt":29,"prevBid":7000,"prevCnt":12,"open":0,"closes":"2026-11-04T19:01:40Z","note":"gesloten"}
+{"t":"2026-11-04T20:06:25.550Z","n":92,"bid":8200,"cnt":13,"prevBid":5700,"prevCnt":8,"open":0,"closes":"2026-11-04T19:03:35.91261Z","note":"sluittijd verlengd"}
+{"t":"2026-11-04T20:06:25.550Z","n":93,"bid":9000,"cnt":19,"prevBid":2500,"prevCnt":6,"open":0,"closes":"2026-11-04T19:07:00.098867Z","note":"sluittijd verlengd"}
+{"t":"2026-11-04T20:06:25.550Z","n":94,"bid":8000,"cnt":6,"prevBid":5000,"prevCnt":1,"open":0,"closes":"2026-11-04T19:06:39.19401Z","note":"sluittijd verlengd"}
+{"t":"2026-11-04T20:06:25.550Z","n":95,"bid":9000,"cnt":20,"prevBid":4200,"prevCnt":11,"open":0,"closes":"2026-11-04T19:10:43.436012Z","note":"sluittijd verlengd"}
+{"t":"2026-11-04T20:06:25.550Z","n":96,"bid":9000,"cnt":19,"prevBid":2700,"prevCnt":6,"open":0,"closes":"2026-11-04T19:07:35.590328Z","note":"sluittijd verlengd"}
+{"t":"2026-11-04T20:06:25.550Z","n":97,"bid":16500,"cnt":11,"prevBid":16500,"prevCnt":11,"open":0,"closes":"2026-11-04T19:06:40Z","note":"gesloten"}
+{"t":"2026-11-04T20:06:25.550Z","n":98,"bid":6500,"cnt":9,"prevBid":5500,"prevCnt":7,"open":0,"closes":"2026-11-04T19:07:30Z","note":"gesloten"}
+{"t":"2026-11-04T20:06:25.550Z","n":99,"bid":20000,"cnt":11,"prevBid":20000,"prevCnt":11,"open":0,"closes":"2026-11-04T19:08:20Z","note":"gesloten"}
+{"t":"2026-11-04T20:06:25.550Z","n":100,"bid":31000,"cnt":51,"prevBid":11000,"prevCnt":20,"open":0,"closes":"2026-11-04T19:22:09.538455Z","note":"sluittijd verlengd"}
+{"t":"2026-11-04T20:06:25.550Z","n":101,"bid":9500,"cnt":20,"prevBid":5700,"prevCnt":13,"open":0,"closes":"2026-11-04T19:10:50.00441Z","note":"sluittijd verlengd"}
+{"t":"2026-11-04T20:06:25.550Z","n":102,"bid":2500,"cnt":3,"prevBid":2500,"prevCnt":3,"open":0,"closes":"2026-11-04T19:10:50Z","note":"gesloten"}
+{"t":"2026-11-04T20:06:25.550Z","n":103,"bid":4500,"cnt":11,"prevBid":2500,"prevCnt":7,"open":0,"closes":"2026-11-04T19:11:40Z","note":"gesloten"}
+{"t":"2026-11-04T20:06:25.550Z","n":104,"bid":12000,"cnt":21,"prevBid":5900,"prevCnt":10,"open":0,"closes":"2026-11-04T19:15:09.472065Z","note":"sluittijd verlengd"}
+{"t":"2026-11-04T20:06:25.550Z","n":105,"bid":6000,"cnt":15,"prevBid":1600,"prevCnt":4,"open":0,"closes":"2026-11-04T19:13:20Z","note":"gesloten"}
+{"t":"2026-11-04T20:06:25.550Z","n":106,"bid":0,"cnt":0,"prevBid":0,"prevCnt":0,"open":0,"closes":"2026-11-04T19:36:40Z","note":"sluittijd verlengd"}
+{"t":"2026-11-04T20:06:25.550Z","n":107,"bid":1800,"cnt":5,"prevBid":1800,"prevCnt":5,"open":0,"closes":"2026-11-04T19:15:00Z","note":"gesloten"}
+{"t":"2026-11-04T20:06:25.550Z","n":108,"bid":13000,"cnt":11,"prevBid":12000,"prevCnt":9,"open":0,"closes":"2026-11-04T19:18:43.775409Z","note":"sluittijd verlengd"}
+{"t":"2026-11-04T20:06:25.550Z","n":109,"bid":1600,"cnt":4,"prevBid":1200,"prevCnt":2,"open":0,"closes":"2026-11-04T19:16:40Z","note":"gesloten"}
+{"t":"2026-11-04T20:06:25.550Z","n":110,"bid":500,"cnt":1,"prevBid":500,"prevCnt":1,"open":0,"closes":"2026-11-04T19:17:30Z","note":"gesloten"}
+{"t":"2026-11-04T20:06:25.550Z","n":111,"bid":13300,"cnt":24,"prevBid":9800,"prevCnt":18,"open":0,"closes":"2026-11-04T19:18:20Z","note":"gesloten"}
+{"t":"2026-11-04T20:06:25.550Z","n":112,"bid":6000,"cnt":11,"prevBid":3000,"prevCnt":5,"open":0,"closes":"2026-11-04T19:21:27.823267Z","note":"sluittijd verlengd"}
+{"t":"2026-11-04T20:06:25.550Z","n":113,"bid":1800,"cnt":5,"prevBid":1200,"prevCnt":2,"open":0,"closes":"2026-11-04T19:20:00Z","note":"gesloten"}
+{"t":"2026-11-04T20:06:25.550Z","n":114,"bid":3500,"cnt":7,"prevBid":2000,"prevCnt":4,"open":0,"closes":"2026-11-04T19:28:03.65919Z","note":"sluittijd verlengd"}
+{"t":"2026-11-04T20:06:25.550Z","n":115,"bid":4500,"cnt":10,"prevBid":1800,"prevCnt":4,"open":0,"closes":"2026-11-04T19:27:28.993553Z","note":"sluittijd verlengd"}
+{"t":"2026-11-04T20:06:25.550Z","n":116,"bid":6200,"cnt":9,"prevBid":4200,"prevCnt":6,"open":0,"closes":"2026-11-04T19:22:30Z","note":"gesloten"}
+{"t":"2026-11-04T20:06:25.550Z","n":117,"bid":20000,"cnt":28,"prevBid":5000,"prevCnt":6,"open":0,"closes":"2026-11-04T19:23:20Z","note":"gesloten"}
+{"t":"2026-11-04T20:06:25.550Z","n":118,"bid":7000,"cnt":11,"prevBid":4000,"prevCnt":6,"open":0,"closes":"2026-11-04T19:24:10Z","note":"gesloten"}
+{"t":"2026-11-04T20:06:25.550Z","n":119,"bid":4500,"cnt":6,"prevBid":4500,"prevCnt":6,"open":0,"closes":"2026-11-04T19:25:00Z","note":"gesloten"}
+{"t":"2026-11-04T20:06:25.550Z","n":120,"bid":6000,"cnt":8,"prevBid":4000,"prevCnt":6,"open":0,"closes":"2026-11-04T19:25:50Z","note":"gesloten"}
+{"t":"2026-11-04T20:06:25.550Z","n":121,"bid":4500,"cnt":12,"prevBid":1600,"prevCnt":4,"open":0,"closes":"2026-11-04T19:28:20.671093Z","note":"sluittijd verlengd"}
+{"t":"2026-11-04T20:06:25.550Z","n":122,"bid":4200,"cnt":11,"prevBid":2700,"prevCnt":8,"open":0,"closes":"2026-11-04T19:27:30Z","note":"gesloten"}
+{"t":"2026-11-04T20:06:25.550Z","n":123,"bid":2100,"cnt":11,"prevBid":500,"prevCnt":3,"open":0,"closes":"2026-11-04T19:28:20Z","note":"gesloten"}
+{"t":"2026-11-04T20:06:25.550Z","n":124,"bid":6000,"cnt":16,"prevBid":1500,"prevCnt":4,"open":0,"closes":"2026-11-04T19:35:49.030206Z","note":"sluittijd verlengd"}
+{"t":"2026-11-04T20:06:25.550Z","n":125,"bid":4000,"cnt":8,"prevBid":1800,"prevCnt":3,"open":0,"closes":"2026-11-04T19:30:00Z","note":"gesloten"}
+{"t":"2026-11-04T20:06:25.550Z","n":126,"bid":3000,"cnt":12,"prevBid":700,"prevCnt":2,"open":0,"closes":"2026-11-04T19:30:50Z","note":"gesloten"}
+{"t":"2026-11-04T20:06:25.550Z","n":127,"bid":700,"cnt":4,"prevBid":300,"prevCnt":2,"open":0,"closes":"2026-11-04T19:31:40Z","note":"gesloten"}
+{"t":"2026-11-04T20:06:25.550Z","n":128,"bid":7000,"cnt":17,"prevBid":700,"prevCnt":2,"open":0,"closes":"2026-11-04T19:32:30Z","note":"gesloten"}
+{"t":"2026-11-04T20:06:25.550Z","n":129,"bid":5600,"cnt":14,"prevBid":500,"prevCnt":2,"open":0,"closes":"2026-11-04T19:33:20Z","note":"gesloten"}
+{"t":"2026-11-04T20:06:25.550Z","n":130,"bid":1700,"cnt":6,"prevBid":1700,"prevCnt":6,"open":0,"closes":"2026-11-04T19:34:10Z","note":"gesloten"}
+{"t":"2026-11-04T20:06:25.550Z","n":131,"bid":186500,"cnt":41,"prevBid":131500,"prevCnt":30,"open":0,"closes":"2026-11-04T19:35:00Z","note":"gesloten"}
+{"t":"2026-11-04T20:06:25.550Z","n":132,"bid":3600,"cnt":10,"prevBid":1100,"prevCnt":4,"open":0,"closes":"2026-11-04T19:35:50Z","note":"gesloten"}
+{"t":"2026-11-04T20:06:25.550Z","n":200,"bid":5500,"cnt":9,"prevBid":1800,"prevCnt":5,"open":0,"closes":"2026-11-04T19:36:40Z","note":"gesloten"}
